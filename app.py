@@ -34,100 +34,107 @@ colors = {
 
 # GENERATE STOCK STATS TABLE
 def getStockTable(df, stock_info):
-	last_day = df.iloc[-1,1:6]
-	# FORMAT THE DAY RANGE OF PRICE
-	low_day = last_day['Low']
-	high_day = last_day['High']
-	range_day = f'{low_day:,.2f}'+' - '+f'{high_day:,.2f}'
-	# OBTAIN AND FORMAT 52 WEEKS RANGE OF PRICE
-	low_52weeks = df['Low'].min()
-	high_52weeks = df['High'].max()
-	range_52weeks = f'{low_day:,.2f}'+' - '+f'{high_day:,.2f}'
 
-	# FORMAT VOLUMNE AND AVERAGE VOLUME
-	vol = last_day['Volume']
-	vol = f'{vol:,.0f}'
-	avg_vol = stock_info['averageVolume10days']
-	avg_vol = f'{avg_vol:,.0f}'
+    last_day = df.iloc[-1,1:6]
 
-	# OBTAIN SHARES OUTSTANDING
-	shareOutstanding = stock_info['sharesOutstanding']
+    # OPEN PRICE
+    last_open_price = last_day['Open']
+    last_open_price = f'{last_open_price:,.2f}'
 
-	# CALCULATE MARKET CAP AND FORMAT IT
-	mktcap = last_day['Close']*shareOutstanding
-	mktcap = f'{mktcap:,.0f}'
+    # FORMAT THE DAY RANGE OF PRICE
+    low_day = last_day['Low']
+    high_day = last_day['High']
+    range_day = f'{low_day:,.2f}'+' - '+f'{high_day:,.2f}'
 
-	# FORMAT BETA
-	beta = stock_info['beta']
-	beta = f'{beta:.2f}'
+    # OBTAIN AND FORMAT 52 WEEKS RANGE OF PRICE
+    low_52weeks = df['Low'].min()
+    high_52weeks = df['High'].max()
+    range_52weeks = f'{low_52weeks:,.2f}'+' - '+f'{high_52weeks:,.2f}'
 
-	# FORMAT PE AND FORWARD PE, IF NO PE, PE NOT IN THE DICTIONARY
-	if 'trailingPE' in stock_info:
-		pe = stock_info['trailingPE']
-		pe = f'{pe:.2f}'
-	else:
-		pe = 'N/A'
-	if 'forwardPE' in stock_info:
-		fpe = stock_info['forwardPE']
-		fpe = f'{fpe:.2f}'
-	else:
-		fpe = 'N/A'
+    # FORMAT VOLUMNE AND AVERAGE VOLUME
+    vol = last_day['Volume']
+    vol = f'{vol:,.0f}'
+    avg_vol = stock_info['averageVolume10days']
+    avg_vol = f'{avg_vol:,.0f}'
 
-	# FORMAT EPS
-	eps = stock_info['trailingEps']
-	eps = f'{eps:.2f}'
+    # OBTAIN SHARES OUTSTANDING
+    shareOutstanding = stock_info['sharesOutstanding']
 
-	# FORMAT PROFIT MARGIN
-	margin = stock_info['profitMargins']
-	margin = f'{margin:.2f}'
+    # CALCULATE MARKET CAP AND FORMAT IT
+    mktcap = last_day['Close']*shareOutstanding
+    mktcap = f'{mktcap:,.0f}'
 
-	# PREPARE DATA FOR DIVIDENT RATE
-	if stock_info['dividendRate'] is None or stock_info['dividendRate']=='':
-		dividend = 'N/A'
-	else:
-		dividend = stock_info['dividendRate']
+    # FORMAT BETA
+    beta = stock_info['beta']
+    beta = f'{beta:.2f}'
 
-	# PREPATE DATA FOR EX-DIVIDEND DATE
-	if stock_info['exDividendDate'] is not None:
-		ex_dividend_date = datetime.fromtimestamp(stock_info['exDividendDate'])
-		ex_dividend_date = ex_dividend_date.strftime('%m-%d-%Y')
-	else: 
-		ex_dividend_date = 'N/A'
+    # FORMAT PE AND FORWARD PE, IF NO PE, PE NOT IN THE DICTIONARY
+    if 'trailingPE' in stock_info:
+        pe = stock_info['trailingPE']
+        pe = f'{pe:.2f}'
+    else:
+        pe = 'N/A'
+    if 'forwardPE' in stock_info:
+        fpe = stock_info['forwardPE']
+        fpe = f'{fpe:.2f}'
+    else:
+        fpe = 'N/A'
 
-	return html.Table([
-		html.Tr([html.Td('Industry'), html.Td(),
-		         html.Td(stock_info['industry'])]),
-		html.Tr([html.Td('Previous Close'), html.Td(),
-			     html.Td(stock_info['previousClose'])]),
-		html.Tr([html.Td('Open'), html.Td(),
-			     html.Td(last_day['Open'])]),
-		html.Tr([html.Td('Day Range'), html.Td(),
-			     html.Td(range_day)]),
-		html.Tr([html.Td('52 Weeks Range'), html.Td(),
-			     html.Td(range_52weeks)]),
-		html.Tr([html.Td('Volume'), html.Td(),
-			     html.Td(vol)]),
-		html.Tr([html.Td('Average Volume'), html.Td(),
-			     html.Td(avg_vol)]),
-		html.Tr([html.Td('Market Capitalization'), html.Td(),
-			     html.Td(mktcap)]),
-		html.Tr([html.Td('Beta'), html.Td(),
-			     html.Td(beta)]),
-		html.Tr([html.Td('PE'), html.Td(),
-			     html.Td(pe)]),
-		html.Tr([html.Td('Forward PE'), html.Td(),
-			     html.Td(fpe)]),
-		html.Tr([html.Td('Earning Per Share (EPS)'), html.Td(),
-			     html.Td(eps)]),
-		html.Tr([html.Td('Profit Margin'), html.Td(),
-			     html.Td(margin)]),
-		html.Tr([html.Td('Dividend'), html.Td(),
-			     html.Td(dividend)]),
-		html.Tr([html.Td('Ex-Dividend Date'), html.Td(),
-			     html.Td(ex_dividend_date)]),
-		html.Tr([html.Td('Earning Per Share (EPS)'), html.Td(),
-			     html.Td(f'{shareOutstanding:,.0f}')])
-		])
+    # FORMAT EPS
+    eps = stock_info['trailingEps']
+    eps = f'{eps:.2f}'
+
+    # FORMAT PROFIT MARGIN
+    margin = stock_info['profitMargins']
+    margin = f'{margin:.2f}'
+
+    # PREPARE DATA FOR DIVIDENT RATE
+    if stock_info['dividendRate'] is None or stock_info['dividendRate']=='':
+        dividend = 'N/A'
+    else:
+        dividend = stock_info['dividendRate']
+
+    # PREPATE DATA FOR EX-DIVIDEND DATE
+    if stock_info['exDividendDate'] is not None:
+        ex_dividend_date = datetime.fromtimestamp(stock_info['exDividendDate'])
+        ex_dividend_date = ex_dividend_date.strftime('%m-%d-%Y')
+    else: 
+        ex_dividend_date = 'N/A'
+
+    return html.Table([
+        html.Tr([html.Td('Industry'), html.Td(),
+                    html.Td(stock_info['industry'])]),
+        html.Tr([html.Td('Previous Close'), html.Td(),
+                    html.Td(stock_info['previousClose'])]),
+        html.Tr([html.Td('Open'), html.Td(),
+                    html.Td(last_open_price)]),
+        html.Tr([html.Td('Day Range'), html.Td(),
+                    html.Td(range_day)]),
+        html.Tr([html.Td('52 Weeks Range'), html.Td(),
+                    html.Td(range_52weeks)]),
+        html.Tr([html.Td('Volume'), html.Td(),
+                    html.Td(vol)]),
+        html.Tr([html.Td('Average Volume'), html.Td(),
+                    html.Td(avg_vol)]),
+        html.Tr([html.Td('Market Capitalization'), html.Td(),
+                    html.Td(mktcap)]),
+        html.Tr([html.Td('Beta'), html.Td(),
+                    html.Td(beta)]),
+        html.Tr([html.Td('PE'), html.Td(),
+                    html.Td(pe)]),
+        html.Tr([html.Td('Forward PE'), html.Td(),
+                    html.Td(fpe)]),
+        html.Tr([html.Td('Earning Per Share (EPS)'), html.Td(),
+                    html.Td(eps)]),
+        html.Tr([html.Td('Profit Margin'), html.Td(),
+                    html.Td(margin)]),
+        html.Tr([html.Td('Dividend'), html.Td(),
+                    html.Td(dividend)]),
+        html.Tr([html.Td('Ex-Dividend Date'), html.Td(),
+                    html.Td(ex_dividend_date)]),
+        html.Tr([html.Td('Shares Outstanding'), html.Td(),
+                    html.Td(f'{shareOutstanding:,.0f}')])
+        ])
 
 """
 #---------------------------PAGE LAYOUT AND CONTENTS----------------------------
@@ -167,7 +174,10 @@ LEFT_COLUMN = dbc.Jumbotron(
         html.Hr(className="my-2"),
         html.Label(dbc.Row([
             dbc.Col([
-                html.Div(id='stock-price')
+                html.Div(
+                    id='stock-price', 
+                    style={"display": "inline-block", "width": "20%", "fontSize": "150%"}
+                )
             ], md=4),
             dbc.Col([
                 html.Div(id='stock-price-change')
@@ -178,8 +188,7 @@ LEFT_COLUMN = dbc.Jumbotron(
         ]), className="lead"),
         html.Div([
             html.Br(),
-            html.Br(),
-            html.Table(id="stock-table-info")
+            dbc.Table(id="stock-table-info")
         ]),
         # html.P(
         #     "(Lower is faster. Higher is more precise)",
@@ -219,7 +228,8 @@ LEFT_COLUMN = dbc.Jumbotron(
             "(Source: Yahoo Finance)",
             style={"fontSize": 10, "font-weight": "lighter"},
         ),
-    ]
+    ],
+    style={"padding": "1.5rem 4rem"}
 )
 
 TICKER_DASHBOARD = [
@@ -358,55 +368,52 @@ app.layout = html.Div(children=[NAVBAR, BODY])
 	          [State('stock_ticker','value')]) # TICKER INPUT
 
 def get_ticker(n_clicks, ticker):
-	# FOR DEFAULT SETTING
-	if ticker == '':
-		return 'PLEASE ENTER A STOCK TICKER', \
-		       '','','',{'width':'20%', 'display':'inline-block'},'', \
-		       {'width':'20%', 'display':'inline-block'},'', \
-		       {'data':None}, None
+    # FOR DEFAULT SETTING
+    if ticker == '':
+        return 'Please select a stock ticker', \
+                '','',{'width':'20%', 'display':'inline-block'},'', \
+                {'width':'20%', 'display':'inline-block'}, None
                
-	# OBTAIN STOCK PRICE AND STATS
-	stock = yfinance.Ticker(ticker)
+    # OBTAIN STOCK PRICE AND STATS
+    stock = yfinance.Ticker(ticker)
 
-	# CATCH IF STOCK EXISTS
-	if stock.history(period='ytd').shape[0] == 0:
-		return 'Unable to find company.', '#######', '$##.##', '##.##', \
-		       {'width':'20%', 'display':'inline-block'}, '##.##%', \
-		       {'width':'20%', 'display':'inline-block'}, \
-		       'Error! Please try again.', {'data':None}, None
+    # CATCH IF STOCK EXISTS
+    if stock.history(period='ytd').shape[0] == 0:
+        return 'Something went wrong.', '$##.##', '##.##', \
+                {'width':'20%', 'display':'inline-block'}, '##.##%', \
+                {'width':'20%', 'display':'inline-block'}, None
 
-	### STOCK STATS FOR INFO BOX ###
-	try: 
-		# NAME AND PRICE
-		stock_name = stock.info['longName']
-		price_list = stock.history(period=time)['Close'].tolist()
-		price = f'${price_list[-1]:.2f}'
-		# PRICE CHANGE
-		price_change = price_list[-1] - price_list[-2]
-		price_percent_change = (price_list[-1]/price_list[-2])-1
+    ### STOCK STATS FOR INFO BOX ###
+    try:
+        # NAME AND PRICE
+        stock_name = stock.info['longName']
+        price_list = stock.history(period='ytd')['Close'].tolist()
+        price = f'${price_list[-1]:.2f}'
+        # PRICE CHANGE
+        price_change = price_list[-1] - price_list[-2]
+        price_percent_change = (price_list[-1]/price_list[-2])-1
 
-		if price_change > 0:
-			price_change_color = {'color':'green'}
-		else:
-			price_change_color = {'color':'red'}
+        if price_change > 0:
+            price_change_color = {'color':'green'}
+        else:
+            price_change_color = {'color':'red'}
 
-		price_change_color['display']= 'inline-block'
-		price_change_color['width']= '20%'
-		price_change_color['font-size'] = '150%'
+        price_change_color['display']= 'inline-block'
+        price_change_color['width']= '20%'
+        price_change_color['font-size'] = '150%'
 
-		price_change = f'{price_change:.2f}'
-		price_percent_change = f'{price_percent_change*100:,.2f}%'
+        price_change = f'{price_change:.2f}'
+        price_percent_change = f'{price_percent_change*100:,.2f}%'
 
-	except:
-		return 'Unable to find company.', '#######', '$##.##', '##.##', \
-		       {'width':'20%', 'display':'inline-block'}, '##.##%', \
-		       {'width':'20%', 'display':'inline-block'}, \
-		       'Error! Please try again another Company.', {'data':None}, None
+        table = getStockTable(stock.history(period='1y').reset_index(), stock.info)
 
+    except:
+        return 'Something went wrong.', '$##.##', '##.##', \
+            {'width':'20%', 'display':'inline-block'}, '##.##%', \
+            {'width':'20%', 'display':'inline-block'}, None
 
-	return stock_name, price, price_change, price_change_color, \
-	       price_percent_change, price_change_color, table
-	    #    price_percent_change, price_change_color, '', table
+    return stock_name, price, price_change, price_change_color, \
+            price_percent_change, price_change_color, table
 
 #------------------------------CALLBACK MAIN GRAPH------------------------------
 
