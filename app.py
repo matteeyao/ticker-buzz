@@ -172,73 +172,51 @@ NAVBAR = dbc.Navbar(
 
 LEFT_COLUMN = dbc.Jumbotron(
     [
-        html.H4(id='stock-name', className="display-5"),
-        html.Hr(className="my-2"),
-        html.Label(dbc.Row([
-            dbc.Col([
-                html.Div(
-                    id='stock-price', 
-                    style={"display": "inline-block", "width": "20%", "fontSize": "150%"}
-                )
-            ], md=4),
-            dbc.Col([
-                html.Div(id='stock-price-change')
-            ], md=4),
-            dbc.Col([
-                html.Div(id='stock-price-percent-change')
-            ], md=4),
-        ], style={"marginBottom": 20}), className="lead"),
-        html.Div([
-            html.Div(
-                [
-                    dbc.Table(
-                        id="stock-table-info",
-                        className="stock-table-info",
-                        style={"width": "100%"}
+        dcc.Loading(
+            id="loading-stock-info",
+            children=[
+                dbc.Alert(
+                    "Unable to obtain company information.",
+                    id="no-stock-info-alert",
+                    color="warning",
+                    style={"display": "none"},
+                ),
+                html.H4(id='stock-name', className="display-5"),
+                html.Hr(className="my-2"),
+                html.Label(dbc.Row([
+                    dbc.Col([
+                        html.Div(
+                            id='stock-price', 
+                            style={"display": "inline-block", "width": "20%", "fontSize": "150%"}
+                        )
+                    ], md=4),
+                    dbc.Col([
+                        html.Div(id='stock-price-change')
+                    ], md=4),
+                    dbc.Col([
+                        html.Div(id='stock-price-percent-change')
+                    ], md=4),
+                ], style={"marginBottom": 20}), className="lead"),
+                html.Div([
+                    html.Div(
+                        [
+                            dbc.Table(
+                                id="stock-table-info",
+                                className="stock-table-info",
+                                style={"width": "100%"}
+                            )
+                        ],
+                        className="stock-table-info-container",
+                        style={"height": 550, "overflowY": "auto", "marginBottom": 10}
                     )
-                ],
-                className="stock-table-info-container",
-                style={"height": 550, "overflowY": "auto", "marginBottom": 10}
-            )
-        ]),
-        # html.P(
-        #     "(Lower is faster. Higher is more precise)",
-        #     style={"fontSize": 10, "font-weight": "lighter"},
-        # ),
-        # dcc.Slider(
-        #     id="n-selection-slider",
-        #     min=1,
-        #     max=100,
-        #     step=1,
-        #     marks={
-        #         0: "0%",
-        #         10: "",
-        #         20: "20%",
-        #         30: "",
-        #         40: "40%",
-        #         50: "",
-        #         60: "60%",
-        #         70: "",
-        #         80: "80%",
-        #         90: "",
-        #         100: "100%",
-        #     },
-        #     value=20,
-        # ),
-        # html.Label("Select a bank", style={"marginTop": 50}, className="lead"),
-        # html.P(
-        #     "(You can use the dropdown or click the barchart on the right)",
-        #     style={"fontSize": 10, "font-weight": "lighter"},
-        # ),
-        # dcc.Dropdown(
-        #     id="bank-drop", clearable=False, style={"marginBottom": 50, "font-size": 12}
-        # ),
-        # html.Label("Select time frame", className="lead"),
-        # html.Div(dcc.RangeSlider(id="time-window-slider"), style={"marginBottom": 50}),
-        html.P(
-            "(Source: Yahoo Finance)",
-            style={"fontSize": 10, "font-weight": "lighter", "position": "absolute", "bottom": "8.5%"},
-        ),
+                ]),
+                html.P(
+                    "(Source: Yahoo Finance)",
+                    style={"fontSize": 10, "font-weight": "lighter", "position": "absolute", "bottom": "8.5%"},
+                ),
+            ],
+            type="circle",
+        )  
     ],
     style={"height": 756, "padding": "1.5rem 3rem"}
 )
@@ -309,36 +287,16 @@ TICKER_DASHBOARD = [
                     ),
                     dbc.Row(
                         [
-                            # dbc.Col(
-                                dcc.Graph(
-                                    id="live-stock-chart",
-                                    className="live-stock-chart",
-                                    config={
-                                        "displaylogo": False,
-                                        "modeBarButtonsToRemove": ["pan2d", "lasso2d"],
-                                    },
-                                ),
-                            # )
+                            dcc.Graph(
+                                id="live-stock-chart",
+                                className="live-stock-chart",
+                                config={
+                                    "displaylogo": False,
+                                    "modeBarButtonsToRemove": ["pan2d", "lasso2d"],
+                                },
+                            ),            
                         ]
                     ),
-                    # dbc.Row(
-                    #     [
-                    #         # dbc.Row(
-                    #         #     [
-                    #         #         dbc.Col(
-                    #         #             dcc.Graph(
-                    #         #                 id="live-price",
-                    #         #                 config={
-                    #         #                     "displaylogo": False,
-                    #         #                     "modeBarButtonsToRemove": ["pan2d", "lasso2d"],
-                    #         #                 },
-                    #         #             )
-                    #         #         )
-                    #         #     ]
-                    #         # ),
-                            
-                    #     ]
-                    # )
                 ],
                 type="default",
             ),
