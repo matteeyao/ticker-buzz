@@ -652,3 +652,16 @@ there.
     font-weight: 500;
     letter-spacing: -1px;
 }
+
+.stock-table-info > table {
+    width: 100%;
+}
+
+.stock-table-info {
+    height: 200px;
+}
+
+.stock-table-info-container::-webkit-scrollbar {
+    width: 0px;
+    background: transparent; /* make scrollbar transparent */
+}

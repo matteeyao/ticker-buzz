@@ -74,7 +74,7 @@ def getStockTable(df, stock_info):
         pe = f'{pe:.2f}'
     else:
         pe = 'N/A'
-    if 'forwardPE' in stock_info:
+    if 'forwardPE' in stock_info and stock_info['forwardPE'] != None:
         fpe = stock_info['forwardPE']
         fpe = f'{fpe:.2f}'
     else:
@@ -133,7 +133,9 @@ def getStockTable(df, stock_info):
         html.Tr([html.Td('Ex-Dividend Date'), html.Td(),
                     html.Td(ex_dividend_date)]),
         html.Tr([html.Td('Shares Outstanding'), html.Td(),
-                    html.Td(f'{shareOutstanding:,.0f}')])
+                    html.Td(f'{shareOutstanding:,.0f}')]),
+        html.Tr([html.Td('Business Summary'), html.Td(),
+            html.Td(stock_info['longBusinessSummary'])]),
         ])
 
 """
@@ -185,10 +187,19 @@ LEFT_COLUMN = dbc.Jumbotron(
             dbc.Col([
                 html.Div(id='stock-price-percent-change')
             ], md=4),
-        ]), className="lead"),
+        ], style={"marginBottom": 20}), className="lead"),
         html.Div([
-            html.Br(),
-            dbc.Table(id="stock-table-info")
+            html.Div(
+                [
+                    dbc.Table(
+                        id="stock-table-info",
+                        className="stock-table-info",
+                        style={"width": "100%"}
+                    )
+                ],
+                className="stock-table-info-container",
+                style={"height": 550, "overflowY": "auto", "marginBottom": 10}
+            )
         ]),
         # html.P(
         #     "(Lower is faster. Higher is more precise)",
@@ -226,10 +237,10 @@ LEFT_COLUMN = dbc.Jumbotron(
         # html.Div(dcc.RangeSlider(id="time-window-slider"), style={"marginBottom": 50}),
         html.P(
             "(Source: Yahoo Finance)",
-            style={"fontSize": 10, "font-weight": "lighter"},
+            style={"fontSize": 10, "font-weight": "lighter", "position": "absolute", "bottom": "8.5%"},
         ),
     ],
-    style={"padding": "1.5rem 4rem"}
+    style={"height": 756, "padding": "1.5rem 3rem"}
 )
 
 TICKER_DASHBOARD = [
@@ -332,7 +343,7 @@ TICKER_DASHBOARD = [
                 type="default",
             ),
         ],
-        style={"marginTop": 0, "marginBottom": 0},
+        style={"height": "100%", "marginTop": 0, "marginBottom": 0},
     ),
 ]
 
@@ -355,77 +366,24 @@ app.layout = html.Div(children=[NAVBAR, BODY])
 
 #------------------------------CALLBACK STOCK INFO------------------------------
 
-@app.callback([Output('stock-name','children'), # STOCK NAME
-	           Output('stock-price','children'), # CURRENT STOCK PRICE
-	           Output('stock-price-change','children'), # PRICE CHANGE
-	           Output('stock-price-change','style'), # PRICE CHANGE FONT COLOR
-	           Output('stock-price-percent-change','children'), # PRICE PERCENT CHANGE
-	           Output('stock-price-percent-change','style'), # PRICE PERCENT CHANGE FONT COLOR
-	        #    Output('error-message','children'), # ERROR MESSAGE
-	           Output('stock-table-info','children')], # STOCK TABLE STATS
-
-	          [Input('submit-button-state','n_clicks')], # BUTTON
-	          [State('stock_ticker','value')]) # TICKER INPUT
-
-def get_ticker(n_clicks, ticker):
-    # FOR DEFAULT SETTING
-    if ticker == '':
-        return 'Please select a stock ticker', \
-                '','',{'width':'20%', 'display':'inline-block'},'', \
-                {'width':'20%', 'display':'inline-block'}, None
-               
-    # OBTAIN STOCK PRICE AND STATS
-    stock = yfinance.Ticker(ticker)
-
-    # CATCH IF STOCK EXISTS
-    if stock.history(period='ytd').shape[0] == 0:
-        return 'Something went wrong.', '$##.##', '##.##', \
-                {'width':'20%', 'display':'inline-block'}, '##.##%', \
-                {'width':'20%', 'display':'inline-block'}, None
-
-    ### STOCK STATS FOR INFO BOX ###
-    try:
-        # NAME AND PRICE
-        stock_name = stock.info['longName']
-        price_list = stock.history(period='ytd')['Close'].tolist()
-        price = f'${price_list[-1]:.2f}'
-        # PRICE CHANGE
-        price_change = price_list[-1] - price_list[-2]
-        price_percent_change = (price_list[-1]/price_list[-2])-1
-
-        if price_change > 0:
-            price_change_color = {'color':'green'}
-        else:
-            price_change_color = {'color':'red'}
-
-        price_change_color['display']= 'inline-block'
-        price_change_color['width']= '20%'
-        price_change_color['font-size'] = '150%'
-
-        price_change = f'{price_change:.2f}'
-        price_percent_change = f'{price_percent_change*100:,.2f}%'
-
-        table = getStockTable(stock.history(period='1y').reset_index(), stock.info)
-
-    except:
-        return 'Something went wrong.', '$##.##', '##.##', \
-            {'width':'20%', 'display':'inline-block'}, '##.##%', \
-            {'width':'20%', 'display':'inline-block'}, None
-
-    return stock_name, price, price_change, price_change_color, \
-            price_percent_change, price_change_color, table
-
-#------------------------------CALLBACK MAIN GRAPH------------------------------
-
 @app.callback(
     # OUTPUT
-    [Output("live-stock-chart", "figure")],
+    [Output('stock-name','children'), # STOCK NAME
+    Output('stock-price','children'), # CURRENT STOCK PRICE
+    Output('stock-price-change','children'), # PRICE CHANGE
+    Output('stock-price-change','style'), # PRICE CHANGE FONT COLOR
+    Output('stock-price-percent-change','children'), # PRICE PERCENT CHANGE
+    Output('stock-price-percent-change','style'), # PRICE PERCENT CHANGE FONT COLOR
+    Output('stock-table-info','children'), # STOCK TABLE STATS
+    Output("live-stock-chart", "figure")],
     # INPUT
-    [Input("submit-button-state", "n_clicks")],
+    [Input('submit-button-state','n_clicks')], # BUTTON
     # STATE
-    [State("stock_ticker", "value"), State("chart", "value")],
+    [State("stock_ticker", "value"), # TICKER INPUT
+     State("chart", "value")],
 )
-def graph_genrator(n_clicks, ticker, chart_name):
+
+def get_ticker(n_clicks, ticker, chart_name):
 
     if n_clicks >= 1:  # CHECKING FOR USER TO CLICK SUBMIT BUTTON
 
@@ -844,6 +802,483 @@ def graph_genrator(n_clicks, ticker, chart_name):
                     ),
                 ),
             )
+
+        # FOR DEFAULT SETTING
+        if ticker == '':
+            return 'Please select a stock ticker', \
+                    '','',{'width':'20%', 'display':'inline-block', 'font-size': '150%'},'', \
+                    {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, None, {'data':None}
+                
+        # OBTAIN STOCK PRICE AND STATS
+        stock = yfinance.Ticker(ticker)
+
+        # CATCH IF STOCK EXISTS
+        if stock.history(period='ytd').shape[0] == 0:
+            return 'Something went wrong', '$##.##', '##.##', \
+                    {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, '##.##%', \
+                    {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, None, {'data':None}
+
+        ### STOCK STATS FOR INFO BOX ###
+        try:
+            # NAME AND PRICE
+            stock_name = stock.info['longName']
+            price_list = stock.history(period='1y')['Close'].tolist()
+            price = f'${price_list[-1]:.2f}'
+            # PRICE CHANGE
+            price_change = price_list[-1] - price_list[-2]
+            price_percent_change = (price_list[-1]/price_list[-2])-1
+
+            if price_change > 0:
+                price_change_color = {'color':'green'}
+            else:
+                price_change_color = {'color':'red'}
+
+            price_change_color['display']= 'inline-block'
+            price_change_color['width']= '20%'
+            price_change_color['font-size'] = '150%'
+
+            price_change = f'{price_change:.2f}'
+            price_percent_change = f'{price_percent_change*100:,.2f}%'
+
+            table = getStockTable(stock.history(period='1y').reset_index(), stock.info)
+
+        except:
+            return 'Something went wrong(2)', '$##.##', '##.##', \
+                {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, '##.##%', \
+                {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, None, {'data':None}
+
+    return stock_name, price, price_change, price_change_color, \
+            price_percent_change, price_change_color, table, fig
+
+#------------------------------CALLBACK MAIN GRAPH------------------------------
+
+# @app.callback(
+    # OUTPUT
+    
+    # INPUT
+    # [Input("submit-button-state", "n_clicks")],
+    # STATE
+    
+# )
+# def graph_generator(n_clicks, ticker, chart_name):
+
+    # if n_clicks >= 1:  # CHECKING FOR USER TO CLICK SUBMIT BUTTON
+
+    #     # LOADING DATA
+    #     start_date = datetime.now().date() - timedelta(days=5 * 365)
+    #     end_data = datetime.now().date()
+    #     df = yf.get_data(
+    #         ticker, start_date=start_date, end_date=end_data, interval="1d"
+    #     )
+    #     stock = Sdf(df)
+
+    #     # -*- SELECTING GRAPH TYPE -*-
+
+    #     # LINE PLOT
+    #     if chart_name == "Line":
+    #         fig = go.Figure(
+    #             data=[
+    #                 go.Scatter(
+    #                     x=list(df.index), y=list(df.close), fill="tozeroy", name="Adj. Close"
+    #                 )
+    #             ],
+    #             layout={
+    #                 "showlegend": True,
+    #                 "plot_bgcolor": colors["background"],
+    #                 "paper_bgcolor": colors["background"],
+    #                 "font": {"color": colors["text"]},
+    #                 'margin': dict(l=40, r=20, t=60, b=20),
+    #             },
+    #         )
+
+    #         fig.update_xaxes(
+    #             rangeslider_visible=True,
+    #             rangeselector=dict(
+    #                 activecolor="rgb(177,183,248)",
+    #                 bgcolor=colors["background"],
+    #                 buttons=list(
+    #                     [
+    #                         dict(count=7, label="10D",
+    #                              step="day", stepmode="backward"),
+    #                         dict(
+    #                             count=15, label="15D", step="day", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=3, label="3m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=6, label="6m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1y", step="year", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=5, label="5y", step="year", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="YTD", step="year", stepmode="todate"
+    #                         ),
+    #                         dict(step="all"),
+    #                     ]
+    #                 ),
+    #             )
+    #         )
+
+    #     # CANDLESTICK
+    #     if chart_name == "Candlestick":
+    #         fig = go.Figure(
+    #             data=[
+    #                 go.Candlestick(
+    #                     x=list(df.index),
+    #                     open=list(df.open),
+    #                     high=list(df.high),
+    #                     low=list(df.low),
+    #                     close=list(df.close),
+    #                     name="Candlestick",
+    #                 )
+    #             ],
+    #             layout={
+    #                 "showlegend": True,
+    #                 "plot_bgcolor": colors["background"],
+    #                 "paper_bgcolor": colors["background"],
+    #                 "font": {"color": colors["text"]},
+    #                 'margin': dict(l=40, r=20, t=60, b=20),
+    #             },
+    #         )
+
+    #         fig.update_xaxes(
+    #             rangeslider_visible=True,
+    #             rangeselector=dict(
+    #                 activecolor="rgb(177,183,248)",
+    #                 bgcolor=colors["background"],
+    #                 buttons=list(
+    #                     [
+    #                         dict(count=7, label="10D",
+    #                              step="day", stepmode="backward"),
+    #                         dict(
+    #                             count=15, label="15D", step="day", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=3, label="3m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=6, label="6m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1y", step="year", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=5, label="5y", step="year", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="YTD", step="year", stepmode="todate"
+    #                         ),
+    #                         dict(step="all"),
+    #                     ]
+    #                 ),
+    #             ),
+    #         )
+
+    #     # SIMPLE MOVING AVERAGE
+    #     if chart_name == "SMA":
+    #         close_ma_10 = df.close.rolling(10).mean()
+    #         close_ma_15 = df.close.rolling(15).mean()
+    #         close_ma_30 = df.close.rolling(30).mean()
+    #         close_ma_100 = df.close.rolling(100).mean()
+    #         fig = go.Figure(
+    #             data=[
+    #                 go.Scatter(
+    #                     x=list(close_ma_10.index), y=list(close_ma_10), name="10 Days"
+    #                 ),
+    #                 go.Scatter(
+    #                     x=list(close_ma_15.index), y=list(close_ma_15), name="15 Days"
+    #                 ),
+    #                 go.Scatter(
+    #                     x=list(close_ma_30.index), y=list(close_ma_15), name="30 Days"
+    #                 ),
+    #                 go.Scatter(
+    #                     x=list(close_ma_100.index), y=list(close_ma_15), name="100 Days"
+    #                 ),
+    #             ],
+    #             layout={
+    #                 "showlegend": True,
+    #                 "plot_bgcolor": colors["background"],
+    #                 "paper_bgcolor": colors["background"],
+    #                 "font": {"color": colors["text"]},
+    #                 'margin': dict(l=40, r=20, t=60, b=20),
+    #             },
+    #         )
+
+    #         fig.update_xaxes(
+    #             rangeslider_visible=True,
+    #             rangeselector=dict(
+    #                 activecolor="rgb(177,183,248)",
+    #                 bgcolor=colors["background"],
+    #                 buttons=list(
+    #                     [
+    #                         dict(count=7, label="10D",
+    #                              step="day", stepmode="backward"),
+    #                         dict(
+    #                             count=15, label="15D", step="day", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=3, label="3m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=6, label="6m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(count=1, label="1y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=5, label="5y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=1, label="YTD",
+    #                              step="year", stepmode="todate"),
+    #                         dict(step="all"),
+    #                     ]
+    #                 ),
+    #             ),
+    #         )
+
+    #     # OPEN_HIGH_LOW_CLOSE
+    #     if chart_name == "OHLC":
+    #         fig = go.Figure(
+    #             data=[
+    #                 go.Ohlc(
+    #                     x=df.index,
+    #                     open=df.open,
+    #                     high=df.high,
+    #                     low=df.low,
+    #                     close=df.close,
+    #                 )
+    #             ],
+    #             layout={
+    #                 "showlegend": True,
+    #                 "plot_bgcolor": colors["background"],
+    #                 "paper_bgcolor": colors["background"],
+    #                 "font": {"color": colors["text"]},
+    #                 'margin': dict(l=40, r=20, t=60, b=20),
+    #             },
+    #         )
+
+    #         fig.update_xaxes(
+    #             rangeslider_visible=True,
+    #             rangeselector=dict(
+    #                 activecolor="rgb(177,183,248)",
+    #                 bgcolor=colors["background"],
+    #                 buttons=list(
+    #                     [
+    #                         dict(count=7, label="10D",
+    #                              step="day", stepmode="backward"),
+    #                         dict(
+    #                             count=15, label="15D", step="day", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=3, label="3m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=6, label="6m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(count=1, label="1y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=5, label="5y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=1, label="YTD",
+    #                              step="year", stepmode="todate"),
+    #                         dict(step="all"),
+    #                     ]
+    #                 ),
+    #             ),
+    #         )
+
+    #     # EXPONENTIAL MOVING AVERAGE
+    #     if chart_name == "EMA":
+    #         close_ema_10 = df.close.ewm(span=10).mean()
+    #         close_ema_15 = df.close.ewm(span=15).mean()
+    #         close_ema_30 = df.close.ewm(span=30).mean()
+    #         close_ema_100 = df.close.ewm(span=100).mean()
+    #         fig = go.Figure(
+    #             data=[
+    #                 go.Scatter(
+    #                     x=list(close_ema_10.index), y=list(close_ema_10), name="10 Days"
+    #                 ),
+    #                 go.Scatter(
+    #                     x=list(close_ema_15.index), y=list(close_ema_15), name="15 Days"
+    #                 ),
+    #                 go.Scatter(
+    #                     x=list(close_ema_30.index), y=list(close_ema_30), name="30 Days"
+    #                 ),
+    #                 go.Scatter(
+    #                     x=list(close_ema_100.index),
+    #                     y=list(close_ema_100),
+    #                     name="100 Days",
+    #                 ),
+    #             ],
+    #             layout={
+    #                 "showlegend": True,
+    #                 "plot_bgcolor": colors["background"],
+    #                 "paper_bgcolor": colors["background"],
+    #                 "font": {"color": colors["text"]},
+    #                 "margin": dict(l=60, r=20, t=60, b=0),
+    #             },
+    #         )
+
+    #         fig.update_xaxes(
+    #             rangeslider_visible=True,
+    #             rangeselector=dict(
+    #                 activecolor="rgb(177,183,248)",
+    #                 bgcolor=colors["background"],
+    #                 buttons=list(
+    #                     [
+    #                         dict(count=7, label="10D",
+    #                              step="day", stepmode="backward"),
+    #                         dict(
+    #                             count=15, label="15D", step="day", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=3, label="3m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=6, label="6m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(count=1, label="1y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=5, label="5y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=1, label="YTD",
+    #                              step="year", stepmode="todate"),
+    #                         dict(step="all"),
+    #                     ]
+    #                 ),
+    #             ),
+    #         )
+
+    #     # MOVING AVERAGE CONVERGENCE DIVERGENCE
+    #     if chart_name == "MACD":
+    #         df["MACD"], df["signal"], df["hist"] = (
+    #             stock["macd"],
+    #             stock["macds"],
+    #             stock["macdh"],
+    #         )
+    #         fig = go.Figure(
+    #             data=[
+    #                 go.Scatter(x=list(df.index), y=list(df.MACD), name="MACD"),
+    #                 go.Scatter(x=list(df.index), y=list(
+    #                     df.signal), name="Signal"),
+    #                 go.Scatter(
+    #                     x=list(df.index),
+    #                     y=list(df["hist"]),
+    #                     line=dict(color="royalblue", width=2, dash="dot"),
+    #                     name="Histogram",
+    #                 ),
+    #             ],
+    #             layout={
+    #                 "showlegend": True,
+    #                 "plot_bgcolor": colors["background"],
+    #                 "paper_bgcolor": colors["background"],
+    #                 "font": {"color": colors["text"]},
+    #                 "margin": dict(l=60, r=20, t=60, b=0),
+    #             },
+    #         )
+
+    #         fig.update_xaxes(
+    #             rangeslider_visible=True,
+    #             rangeselector=dict(
+    #                 activecolor="rgb(177,183,248)",
+    #                 bgcolor=colors["background"],
+    #                 buttons=list(
+    #                     [
+    #                         dict(count=7, label="10D",
+    #                              step="day", stepmode="backward"),
+    #                         dict(
+    #                             count=15, label="15D", step="day", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=3, label="3m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=6, label="6m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(count=1, label="1y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=5, label="5y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=1, label="YTD",
+    #                              step="year", stepmode="todate"),
+    #                         dict(step="all"),
+    #                     ]
+    #                 ),
+    #             ),
+    #         )
+
+    #     # RELATIVE STRENGTH INDEX
+    #     if chart_name == "RSI":
+    #         rsi_6 = stock["rsi_6"]
+    #         rsi_12 = stock["rsi_12"]
+    #         fig = go.Figure(
+    #             data=[
+    #                 go.Scatter(x=list(df.index), y=list(
+    #                     rsi_6), name="RSI 6 Day"),
+    #                 go.Scatter(x=list(df.index), y=list(
+    #                     rsi_12), name="RSI 12 Day"),
+    #             ],
+    #             layout={
+    #                 "showlegend": True,
+    #                 "plot_bgcolor": colors["background"],
+    #                 "paper_bgcolor": colors["background"],
+    #                 "font": {"color": colors["text"]},
+    #                 "margin": dict(l=60, r=20, t=60, b=0),
+    #             },
+    #         )
+    #         fig.update_xaxes(
+    #             rangeslider_visible=True,
+    #             rangeselector=dict(
+    #                 activecolor="rgb(177,183,248)",
+    #                 bgcolor=colors["background"],
+    #                 buttons=list(
+    #                     [
+    #                         dict(count=7, label="10D",
+    #                              step="day", stepmode="backward"),
+    #                         dict(
+    #                             count=15, label="15D", step="day", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=1, label="1m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=3, label="3m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(
+    #                             count=6, label="6m", step="month", stepmode="backward"
+    #                         ),
+    #                         dict(count=1, label="1y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=5, label="5y", step="year",
+    #                              stepmode="backward"),
+    #                         dict(count=1, label="YTD",
+    #                              step="year", stepmode="todate"),
+    #                         dict(step="all"),
+    #                     ]
+    #                 ),
+    #             ),
+    #         )
 
     # end_data = datetime.now().date()
     # start_date = datetime.now().date() - timedelta(days=30)
