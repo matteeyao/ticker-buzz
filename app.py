@@ -21,7 +21,7 @@ import numpy
 
 EXTERNAL_STYLESHEETS = ['/assets/stylesheet.css']
 # external_stylesheets = [dbc.themes.SLATE, '/assets/stylesheet.css']
-PLOTLY_LOGO = "https://media-exp1.licdn.com/dms/image/C5603AQEyuiO1NNldBQ/profile-displayphoto-shrink_200_200/0/1517031230100?e=1622678400&v=beta&t=eyYue9BTDXJEDjGoBecHkas6irIF690otD9n3mPsvzQ"
+PLOTLY_LOGO = "/assets/favicon.ico"
 with open("tickers.pickle", "rb") as f:
     ticker_list = pickle.load(f)
 
@@ -154,9 +154,19 @@ NAVBAR = dbc.Navbar(
             # Use row and col to control vertical alignment of logo / brand
             dbc.Row(
                 [
-                    dbc.Col(html.Img(src=PLOTLY_LOGO, height="50px", style={"borderRadius":"50px"})),
                     dbc.Col(
-                        dbc.NavbarBrand("Ticker Buzz | Matt Yao", className="ml-2")
+                        html.Img(
+                            src=PLOTLY_LOGO, 
+                            height="100px", 
+                            style={"marginLeft": -20}
+                        ),
+                        style={"maxWidth": "32%"}
+                    ),
+                    dbc.Col(
+                        dbc.NavbarBrand("Ticker Buzz", 
+                            className="ml-2", 
+                            style={"fontSize": 26}
+                        )
                     ),
                 ],
                 align="center",
@@ -167,7 +177,8 @@ NAVBAR = dbc.Navbar(
     ],
     color="dark",
     dark=True,
-    sticky="top"
+    sticky="top",
+    style={"height": 80}
 )
 
 LEFT_COLUMN = dbc.Jumbotron(
@@ -319,6 +330,8 @@ BODY = dbc.Container(
 )
 
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+
+app.title = "Ticker Buzz"
 
 app.layout = html.Div(children=[NAVBAR, BODY])
 
