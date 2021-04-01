@@ -13,5 +13,5 @@ numpy==1.19.0
 gunicorn==19.7.1
 yfinance==0.1.59
 
-
+cachetool==4.2.1
 mysql-connector-python==8.0.23
