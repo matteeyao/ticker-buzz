@@ -18,17 +18,25 @@ import config
 
 analyzer = SentimentIntensityAnalyzer()
 
+CKEY = os.getenv('SECRET_KEY', config.ckey)
+CSECRET = os.getenv('SECRET_KEY', config.csecret)
+ATOKEN = os.getenv('SECRET_KEY', config.atoken)
+ASECRET = os.getenv('SECRET_KEY', config.asecret)
+HOST = os.getenv('SECRET_KEY', config.host)
+USER = os.getenv('SECRET_KEY', config.user)
+PASSWD = os.getenv('SECRET_KEY', config.passwd)
+
 # Insert your twitter API key here 
-ckey = config.ckey
-csecret = config.csecret
-atoken = config.atoken
-asecret = config.asecret
+ckey = CKEY
+csecret = CSECRET
+atoken = ATOKEN
+asecret = ASECRET
 
 # CONNECT TO A MYSQL SERVER 
 mydb = mysql.connector.connect(
-    host=config.host,
-    user=config.user,
-    passwd=config.passwd
+    host=HOST,
+    user=USER,
+    passwd=PASSWD
 )
 
 # setup cursor

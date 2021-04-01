@@ -29,11 +29,15 @@ import random
 import numpy
 import config
 
+HOST = os.getenv('HOST', config.host)
+USER = os.getenv('USER', config.user)
+PASSWD = os.getenv('PASSWD', config.passwd)
+
 ## CONNECTING TO MYSQL
 mydb = mysql.connector.connect(
-    host=config.host,
-    user=config.user,
-    passwd=config.passwd
+    host=HOST,
+    user=USER,
+    passwd=PASSWD
 )
 
 PLOTLY_LOGO = "/assets/favicon.ico"

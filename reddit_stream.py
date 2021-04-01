@@ -11,22 +11,32 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from unidecode import unidecode
 import time
 import config
+
 analyzer = SentimentIntensityAnalyzer()
+
+CLIENT_ID = os.getenv('SECRET_KEY', config.client_id)
+CLIENT_SECRET = os.getenv('SECRET_KEY', config.client_secret)
+USERNAME = os.getenv('SECRET_KEY', config.username)
+PASSWORD = os.getenv('SECRET_KEY', config.password)
+USER_AGENT = os.getenv('SECRET_KEY', config.user_agent)
+HOST = os.getenv('SECRET_KEY', config.host)
+USER = os.getenv('SECRET_KEY', config.user)
+PASSWD = os.getenv('SECRET_KEY', config.passwd)
 
 # Initialize reddit api here 
 reddit = praw.Reddit(
-    client_id=config.client_id,
-    client_secret=config.client_secret, 
-    username=config.username,
-    password=config.password,
-    user_agent=config.user_agent
+    client_id=CLIENT_ID,
+    client_secret=CLIENT_SECRET, 
+    username=USERNAME,
+    password=PASSWORD,
+    user_agent=USER_AGENT
 )
 
 # Connect to a mysql server
 mydb = mysql.connector.connect(
-    host=config.host,
-    user=config.user,
-    passwd=config.passwd
+    host=HOST,
+    user=USER,
+    passwd=PASSWD
 )
 
 mycursor = mydb.cursor()
