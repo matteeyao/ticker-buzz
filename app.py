@@ -27,7 +27,10 @@ import numpy as np
 import pandas as pd
 import random
 import numpy
-from config import *
+
+if os.path.exists('config.py'):
+    import config
+
 
 HOST = os.getenv('HOST', config.host)
 USER = os.getenv('USER', config.user)
