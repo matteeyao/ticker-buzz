@@ -27,7 +27,7 @@ import numpy as np
 import pandas as pd
 import random
 import numpy
-import config
+from config import *
 
 HOST = os.getenv('HOST', config.host)
 USER = os.getenv('USER', config.user)
