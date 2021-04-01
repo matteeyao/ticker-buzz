@@ -2,7 +2,16 @@
 """
 Module doc string
 """
+# SET CHDIR TO CURRENT DIR
+import os
+import sys
+sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
+os.chdir(os.path.realpath(os.path.dirname(__file__)))
+
+import mysql.connector
+from cachetools import LRUCache, cached, TTLCache
 import dash
+import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 from dash.dependencies import Input, Output, State
@@ -19,9 +28,18 @@ import pandas as pd
 import random
 import numpy
 
+## CONNECTING TO MYSQL
+mydb = mysql.connector.connect(
+    host="localhost",
+    user="mattyyao",
+    passwd="C02C75KSMD6R"
+)
+
 EXTERNAL_STYLESHEETS = ['/assets/stylesheet.css']
 # external_stylesheets = [dbc.themes.SLATE, '/assets/stylesheet.css']
 PLOTLY_LOGO = "/assets/favicon.ico"
+REDDIT_LOGO = "https://external-preview.redd.it/iDdntscPf-nfWKqzHRGFmhVxZm4hZgaKe5oyFws-yzA.png?auto=webp&s=38648ef0dc2c3fce76d5e1d8639234d8da0152b2"
+TWITTER_LOGO = "https://assets.stickpng.com/images/580b57fcd9996e24bc43c53e.png"
 with open("tickers.pickle", "rb") as f:
     ticker_list = pickle.load(f)
 
@@ -157,15 +175,15 @@ NAVBAR = dbc.Navbar(
                     dbc.Col(
                         html.Img(
                             src=PLOTLY_LOGO, 
-                            height="100px", 
-                            style={"marginLeft": -20}
+                            height="40px", 
+                            style={"marginLeft": 35}
                         ),
-                        style={"maxWidth": "32%"}
+                        style={"maxWidth": "40%"}
                     ),
                     dbc.Col(
                         dbc.NavbarBrand("Ticker Buzz", 
                             className="ml-2", 
-                            style={"fontSize": 26}
+                            style={"fontSize": 24}
                         )
                     ),
                 ],
@@ -178,7 +196,7 @@ NAVBAR = dbc.Navbar(
     color="dark",
     dark=True,
     sticky="top",
-    style={"height": 80}
+    style={"height": 60}
 )
 
 LEFT_COLUMN = dbc.Jumbotron(
@@ -218,12 +236,12 @@ LEFT_COLUMN = dbc.Jumbotron(
                             )
                         ],
                         className="stock-table-info-container",
-                        style={"height": 550, "overflowY": "auto", "marginBottom": 10}
+                        style={"height": 590, "overflowY": "auto", "marginBottom": 10}
                     )
                 ]),
                 html.P(
                     "(Source: Yahoo Finance)",
-                    style={"fontSize": 10, "font-weight": "lighter", "position": "absolute", "bottom": "8.5%"},
+                    style={"fontSize": 10, "font-weight": "lighter", "position": "absolute", "bottom": "4.5%"},
                 ),
             ],
             type="circle",
@@ -254,11 +272,11 @@ TICKER_DASHBOARD = [
                                     dcc.Dropdown(
                                         id="stock_ticker",
                                         options=[{
-                                                "label": str(ticker_list[i]),
-                                                "value": str(ticker_list[i]),
-                                            } for i in range(len(ticker_list))],
+                                                "label": s,
+                                                "value": s,
+                                            } for s in ticker_list.keys()],
                                         searchable=True,
-                                        value=str("DIS"),
+                                        value=str("Walt Disney Company (DIS)"),
                                         placeholder="Select a ticker...",
                                     )
                                 ],
@@ -312,9 +330,88 @@ TICKER_DASHBOARD = [
                 type="default",
             ),
         ],
-        style={"height": "100%", "marginTop": 0, "marginBottom": 0},
+        style={"marginTop": 0, "marginBottom": 0},
     ),
 ]
+
+REDDIT_COMMENTS_CONTAINER = [
+    dbc.CardHeader(html.H5("Reddit Comment Mention Feed")),
+    dbc.Alert(
+        "Unable to connect to Reddit at this time.",
+        id="no-data-alert-reddit",
+        color="warning",
+        style={"display": "none"},
+    ),
+    dbc.CardBody(
+        [
+            dcc.Loading(
+                id="loading-reddit-comments", 
+                children=[
+                    dbc.Alert(
+                        "Unable to connect to Reddit at this time.",
+                        id="no-reddit-feed-alert",
+                        color="warning",
+                        style={"display": "none"},
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                html.Div(
+                                    id='reddit-comments',
+                                    style={"display": "flex", "justifyContent": "horizontal", "overflowX": "auto","minHeight": 433}
+                                ),
+                                width=12
+                            )
+                        ]
+                    ),
+                ],
+                type="default"
+            ),
+            html.Hr(),
+        ],
+        style={"minHeight": 446}
+    ),
+]
+
+TWITTER_TWEETS_CONTAINER = [
+    dbc.CardHeader(html.H5("Twitter Mention Feed")),
+    dbc.Alert(
+        "Unable to connect to Twitter at this time.",
+        id="no-data-alert-twitter",
+        color="warning",
+        style={"display": "none"},
+    ),
+    dbc.CardBody(
+        [
+            dcc.Loading(
+                id="loading-twitter-tweets", 
+                children=[
+                    dbc.Alert(
+                        "Unable to connect to Twitter at this time.",
+                        id="no-twitter-feed-alert",
+                        color="warning",
+                        style={"display": "none"},
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col(
+                                html.Div(
+                                    id='twitter-tweets',
+                                    style={"display": "flex", "justifyContent": "horizontal", "overflowX": "auto", "minHeight": 433}
+                                ),
+                                width=12
+                            )
+                        ]
+                    ),
+                ],
+                type="default"
+            ),
+            html.Hr(),
+        ],
+        style={"minHeight": 446}
+    ),
+]
+
 
 BODY = dbc.Container(
     [
@@ -324,7 +421,9 @@ BODY = dbc.Container(
                 dbc.Col(dbc.Card(TICKER_DASHBOARD), md=8),
             ],
             style={"marginTop": 30},
-        )
+        ),
+        dbc.Row([dbc.Col(dbc.Card(REDDIT_COMMENTS_CONTAINER)),], style={"marginTop": 15}),
+        dbc.Row([dbc.Col(dbc.Card(TWITTER_TWEETS_CONTAINER)),], style={"marginTop": 30, "marginBottom": 15}),
     ],
     className="mt-12",
 )
@@ -355,6 +454,8 @@ app.layout = html.Div(children=[NAVBAR, BODY])
 )
 
 def get_ticker(n_clicks, ticker, chart_name):
+
+    ticker = ticker_list[ticker][0]
 
     if n_clicks >= 1:  # CHECKING FOR USER TO CLICK SUBMIT BUTTON
 
@@ -820,6 +921,107 @@ def get_ticker(n_clicks, ticker, chart_name):
 
     return stock_name, price, price_change, price_change_color, \
             price_percent_change, price_change_color, table, fig
+
+#------------------------FETCH REDDIT/TWITTER MENTIONS--------------------------
+
+def generate_reddit_cards(df):
+    return [dbc.Card(
+        [
+            dbc.CardHeader(
+                children=[
+                    html.Img(
+                        src=REDDIT_LOGO, 
+                        height="40px", 
+                        style={"marginRight": 10}
+                    ),
+                    html.Div(
+                        "r/"+d[0],
+                        style={"fontSize": 16,}
+                    )
+                ],
+                style={"display":"flex", "alignItems": "center"}
+            ),
+            dbc.CardBody(
+                [
+                    html.P(
+                        (d[2][0:419:1], d[2][0:420:1])[d[2][420] == " "]+"..." if len(d[2]) > 420 else d[2],
+                        className="card-text",
+                    ),
+                ]            
+            )
+        ],
+        className="ticker-mention",
+        color="dark",
+        inverse=True
+    ) for d in df.values.tolist()]
+
+def generate_twitter_cards(df):
+    return [dbc.Card(
+        [
+            dbc.CardHeader(
+                children=[
+                    html.Img(
+                        src=TWITTER_LOGO, 
+                        height="40px", 
+                        style={"marginRight": 10}
+                    ),
+                ],
+                style={"display":"flex", "alignItems": "center"}
+            ),
+            dbc.CardBody(
+                [
+                    html.P(
+                        (d[1][0:419:1], d[1][0:420:1])[d[2][420] == " "]+"..." if len(d[1]) > 420 else d[1],
+                        className="card-text",
+                    ),
+                ]            
+            )
+        ],
+        className="ticker-mention",
+        color="dark",
+        inverse=True
+    ) for d in df.values.tolist()]
+
+@app.callback(
+    # OUTPUT
+    [Output('reddit-comments','children'),
+    Output('twitter-tweets','children')],
+    # INPUT
+    [Input('submit-button-state','n_clicks')], # BUTTON
+    # STATE
+    [State("stock_ticker", "value")] # TICKER INPUT
+)
+
+def update_mentions(n_clicks, ticker):
+
+    company = ticker_list[ticker][1]
+    ticker = ticker_list[ticker][0]
+
+    if n_clicks >= 1: # CHECKING FOR USER TO CLICK SUBMIT BUTTON
+
+        try:
+            reddit_df = pd.read_sql(
+                """SELECT * FROM reddit_data.reddit_data_sentiment 
+                WHERE body LIKE %s AND date_time > ADDDATE(date_time, -1)
+                OR body LIKE %s AND date_time > ADDDATE(date_time, -1)
+                ORDER BY date_time DESC LIMIT 20;""", con=mydb, params=('%'+company+'%', '%$'+ticker+' %',))
+            twitter_df = pd.read_sql(
+                """SELECT * FROM twitter_data.twitter_data_sentiment 
+                WHERE tweet LIKE %s AND date_time > ADDDATE(date_time, -1)
+                OR tweet LIKE %s AND date_time > ADDDATE(date_time, -1)
+                ORDER BY date_time DESC LIMIT 20;""", con=mydb, params=('%'+company+'%', '%$'+ticker+' %',))
+
+            reddit_df = reddit_df[['subreddit','date_time','body']]
+            twitter_df = twitter_df[['date_time', 'tweet']]
+
+            return generate_reddit_cards(reddit_df), generate_twitter_cards(twitter_df)
+
+        except Exception as e:
+            with open('errors.txt', 'a') as f:
+                f.write(str(e))
+                f.write('\n')
+
+#-------------------------------------------------------------------------------
 
 server = app.server
 

@@ -564,8 +564,8 @@ ol {
 –––––––––––––––––––––––––––––––––––––––––––––––––– */
 
 hr {
-	margin-top: 3rem;
-	margin-bottom: 3.5rem;
+	margin-top: 0;
+	margin-bottom: 0;
 	border-width: 0;
 	border-top: 1px solid #E1E1E1;
 }
@@ -664,4 +664,22 @@ there.
 .stock-table-info-container::-webkit-scrollbar {
     width: 0px;
     background: transparent; /* make scrollbar transparent */
+}
+
+.ticker-mention {
+    max-width: 260px;
+    min-width: 260px;
+    margin-right: 10px;
+    margin-bottom: 10px;
+}
+
+.ticker-mention > .card-body {
+    overflow-y: hidden;
+    max-height: 350px;
+    min-height: 350px;
+}
+
+#reddit-comments::-webkit-scrollbar-track {
+    background-color: transparent;
+    display: none;
 }
