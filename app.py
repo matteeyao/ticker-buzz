@@ -5,8 +5,8 @@ Module doc string
 # SET CHDIR TO CURRENT DIR
 import os
 import sys
-sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
-os.chdir(os.path.realpath(os.path.dirname(__file__)))
+# sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
+# os.chdir(os.path.realpath(os.path.dirname(__file__)))
 
 import mysql.connector
 from cachetools import LRUCache, cached, TTLCache
@@ -32,9 +32,9 @@ if os.path.exists('config.py'):
     import config
 
 
-HOST = str(os.getenv('HOST', config.host))
-USER = str(os.getenv('USER', config.user))
-PASSWD = str(os.getenv('PASSWD', config.passwd))
+HOST = os.getenv('HOST', config.host)
+USER = os.getenv('USER', config.user)
+PASSWD = os.getenv('PASSWD', config.passwd)
 
 ## CONNECTING TO MYSQL
 mydb = mysql.connector.connect(
