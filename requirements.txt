@@ -14,4 +14,4 @@ gunicorn==19.7.1
 yfinance==0.1.59
 
 
-mysql==8.0.23
+mysql-connector-python==8.0.23
