@@ -32,9 +32,12 @@ if os.path.exists('config.py'):
     import config
 
 
-HOST = os.getenv('HOST', config.host)
-USER = os.getenv('USER', config.user)
-PASSWD = os.getenv('PASSWD', config.passwd)
+# HOST = os.getenv('HOST', config.host)
+# USER = os.getenv('USER', config.user)
+# PASSWD = os.getenv('PASSWD', config.passwd)
+HOST = os.getenv('HOST')
+USER = os.getenv('USER')
+PASSWD = os.getenv('PASSWD')
 
 ## CONNECTING TO MYSQL
 mydb = mysql.connector.connect(
