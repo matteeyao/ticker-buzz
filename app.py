@@ -36,8 +36,6 @@ mydb = mysql.connector.connect(
     passwd=config.passwd
 )
 
-EXTERNAL_STYLESHEETS = ['/assets/stylesheet.css']
-# external_stylesheets = [dbc.themes.SLATE, '/assets/stylesheet.css']
 PLOTLY_LOGO = "/assets/favicon.ico"
 REDDIT_LOGO = "https://external-preview.redd.it/iDdntscPf-nfWKqzHRGFmhVxZm4hZgaKe5oyFws-yzA.png?auto=webp&s=38648ef0dc2c3fce76d5e1d8639234d8da0152b2"
 TWITTER_LOGO = "https://assets.stickpng.com/images/580b57fcd9996e24bc43c53e.png"

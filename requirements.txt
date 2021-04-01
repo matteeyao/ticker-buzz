@@ -12,3 +12,6 @@ dash_core_components==1.10.1
 numpy==1.19.0
 gunicorn==19.7.1
 yfinance==0.1.59
+
+
+mysql==8.0.23
