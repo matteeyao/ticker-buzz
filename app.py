@@ -27,12 +27,13 @@ import numpy as np
 import pandas as pd
 import random
 import numpy
+import config
 
 ## CONNECTING TO MYSQL
 mydb = mysql.connector.connect(
-    host="localhost",
-    user="mattyyao",
-    passwd="C02C75KSMD6R"
+    host=config.host,
+    user=config.user,
+    passwd=config.passwd
 )
 
 EXTERNAL_STYLESHEETS = ['/assets/stylesheet.css']
@@ -1024,6 +1025,4 @@ def update_mentions(n_clicks, ticker):
 #-------------------------------------------------------------------------------
 
 server = app.server
-
-if __name__ == "__main__":
-    app.run_server(debug=True)
+dev_server = app.run_server

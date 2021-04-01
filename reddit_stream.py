@@ -10,22 +10,23 @@ import datetime
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from unidecode import unidecode
 import time
+import config
 analyzer = SentimentIntensityAnalyzer()
 
 # Initialize reddit api here 
 reddit = praw.Reddit(
-    client_id="YdEhrrMCXZ8dRg",
-    client_secret="VF2YnRnCkndOdKwWK3V_VFDj-etLMA", 
-    username="hippiebees",
-    password="myao3237",
-    user_agent="hippiebees",
+    client_id=config.client_id,
+    client_secret=config.client_secret, 
+    username=config.username,
+    password=config.password,
+    user_agent=config.user_agent
 )
 
 # Connect to a mysql server
 mydb = mysql.connector.connect(
-    host="localhost",
-    user="mattyyao",
-    passwd="C02C75KSMD6R"
+    host=config.host,
+    user=config.user,
+    passwd=config.passwd
 )
 
 mycursor = mydb.cursor()

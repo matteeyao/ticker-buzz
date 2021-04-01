@@ -14,20 +14,21 @@ from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from unidecode import unidecode
 import pandas as pd
 import json
+import config
 
 analyzer = SentimentIntensityAnalyzer()
 
 # Insert your twitter API key here 
-ckey = "ZDXBY19eQFVOHyX2qKetAjxvz"
-csecret = "PByEr3bInQqVnpbAZynuYiLDTeGjVUa0gzvmBdtsdVHSgugEag"
-atoken = "1071071752141172737-16at4L3nA5GOQ50nJfDVA6oMbiQvMe"
-asecret = "SV4k5Y7JOPcsbPvQRMmocdmzMDRyElHj54pY2U2INeIyF"
+ckey = config.ckey
+csecret = config.csecret
+atoken = config.atoken
+asecret = config.asecret
 
-# connect to a mysql server 
+# CONNECT TO A MYSQL SERVER 
 mydb = mysql.connector.connect(
-    host="localhost",
-    user="mattyyao",
-    passwd="C02C75KSMD6R"
+    host=config.host,
+    user=config.user,
+    passwd=config.passwd
 )
 
 # setup cursor
