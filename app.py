@@ -3,12 +3,12 @@
 Module doc string
 """
 # SET CHDIR TO CURRENT DIR
-import os
-import sys
+import sys, os
 # sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 # os.chdir(os.path.realpath(os.path.dirname(__file__)))
 
-import mysql.connector
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
 from cachetools import LRUCache, cached, TTLCache
 import dash
 import dash_table
@@ -27,17 +27,13 @@ import numpy as np
 import pandas as pd
 import random
 import numpy
+from dotenv import load_dotenv
 
-HOST = os.getenv('HOST')
-USER = os.getenv('USER')
-PASSWD = os.getenv('PASSWD')
+load_dotenv()
 
-## CONNECTING TO MYSQL
-mydb = mysql.connector.connect(
-    host=HOST,
-    user=USER,
-    passwd=PASSWD
-)
+## PUT YOUR URL IN AN ENVIRONMENT VARIABLE AND CONNECT.
+engine=create_engine(os.getenv("DATABASE_URL"))
+mydb=scoped_session(sessionmaker(bind=engine))
 
 PLOTLY_LOGO = "/assets/favicon.ico"
 REDDIT_LOGO = "https://external-preview.redd.it/iDdntscPf-nfWKqzHRGFmhVxZm4hZgaKe5oyFws-yzA.png?auto=webp&s=38648ef0dc2c3fce76d5e1d8639234d8da0152b2"
@@ -375,46 +371,6 @@ REDDIT_COMMENTS_CONTAINER = [
     ),
 ]
 
-TWITTER_TWEETS_CONTAINER = [
-    dbc.CardHeader(html.H5("Twitter Mention Feed")),
-    dbc.Alert(
-        "Unable to connect to Twitter at this time.",
-        id="no-data-alert-twitter",
-        color="warning",
-        style={"display": "none"},
-    ),
-    dbc.CardBody(
-        [
-            dcc.Loading(
-                id="loading-twitter-tweets", 
-                children=[
-                    dbc.Alert(
-                        "Unable to connect to Twitter at this time.",
-                        id="no-twitter-feed-alert",
-                        color="warning",
-                        style={"display": "none"},
-                    ),
-                    dbc.Row(
-                        [
-                            dbc.Col(
-                                html.Div(
-                                    id='twitter-tweets',
-                                    style={"display": "flex", "justifyContent": "horizontal", "overflowX": "auto", "minHeight": 433}
-                                ),
-                                width=12
-                            )
-                        ]
-                    ),
-                ],
-                type="default"
-            ),
-            html.Hr(),
-        ],
-        style={"minHeight": 446}
-    ),
-]
-
-
 BODY = dbc.Container(
     [
         dbc.Row(
@@ -424,8 +380,7 @@ BODY = dbc.Container(
             ],
             style={"marginTop": 30},
         ),
-        dbc.Row([dbc.Col(dbc.Card(REDDIT_COMMENTS_CONTAINER)),], style={"marginTop": 15}),
-        dbc.Row([dbc.Col(dbc.Card(TWITTER_TWEETS_CONTAINER)),], style={"marginTop": 30, "marginBottom": 15}),
+        dbc.Row([dbc.Col(dbc.Card(REDDIT_COMMENTS_CONTAINER)),], style={"marginTop": 15, "marginBottom": 15}),
     ],
     className="mt-12",
 )
@@ -957,37 +912,9 @@ def generate_reddit_cards(df):
         inverse=True
     ) for d in df.values.tolist()]
 
-def generate_twitter_cards(df):
-    return [dbc.Card(
-        [
-            dbc.CardHeader(
-                children=[
-                    html.Img(
-                        src=TWITTER_LOGO, 
-                        height="40px", 
-                        style={"marginRight": 10}
-                    ),
-                ],
-                style={"display":"flex", "alignItems": "center"}
-            ),
-            dbc.CardBody(
-                [
-                    html.P(
-                        (d[1][0:419:1], d[1][0:420:1])[d[2][420] == " "]+"..." if len(d[1]) > 420 else d[1],
-                        className="card-text",
-                    ),
-                ]            
-            )
-        ],
-        className="ticker-mention",
-        color="dark",
-        inverse=True
-    ) for d in df.values.tolist()]
-
 @app.callback(
     # OUTPUT
-    [Output('reddit-comments','children'),
-    Output('twitter-tweets','children')],
+    Output('reddit-comments','children'),
     # INPUT
     [Input('submit-button-state','n_clicks')], # BUTTON
     # STATE
@@ -1003,20 +930,13 @@ def update_mentions(n_clicks, ticker):
 
         try:
             reddit_df = pd.read_sql(
-                """SELECT * FROM reddit_data.reddit_data_sentiment 
-                WHERE body LIKE %s AND date_time > ADDDATE(date_time, -1)
-                OR body LIKE %s AND date_time > ADDDATE(date_time, -1)
-                ORDER BY date_time DESC LIMIT 20;""", con=mydb, params=('%'+company+'%', '%$'+ticker+' %',))
-            twitter_df = pd.read_sql(
-                """SELECT * FROM twitter_data.twitter_data_sentiment 
-                WHERE tweet LIKE %s AND date_time > ADDDATE(date_time, -1)
-                OR tweet LIKE %s AND date_time > ADDDATE(date_time, -1)
-                ORDER BY date_time DESC LIMIT 20;""", con=mydb, params=('%'+company+'%', '%$'+ticker+' %',))
+                """SELECT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                ORDER BY date_time DESC LIMIT 20;""", con=engine, params=('%'+company+'%', '%$'+ticker+' %',))
 
             reddit_df = reddit_df[['subreddit','date_time','body']]
-            twitter_df = twitter_df[['date_time', 'tweet']]
 
-            return generate_reddit_cards(reddit_df), generate_twitter_cards(twitter_df)
+            return generate_reddit_cards(reddit_df)
 
         except Exception as e:
             with open('errors.txt', 'a') as f:

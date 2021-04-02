@@ -1,62 +1,46 @@
-# SET CHDIR TO CURRENT DIR
-import os
-import sys
-sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
-os.chdir(os.path.realpath(os.path.dirname(__file__)))
-
+from sqlalchemy import create_engine
+from sqlalchemy.orm import scoped_session, sessionmaker
+import psycopg2
+import sys, os
 import praw
-import mysql.connector
 import datetime
-from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 from unidecode import unidecode
 import time
-import config
+from dotenv import load_dotenv
 
-analyzer = SentimentIntensityAnalyzer()
 
-CLIENT_ID = os.getenv('SECRET_KEY', config.client_id)
-CLIENT_SECRET = os.getenv('SECRET_KEY', config.client_secret)
-USERNAME = os.getenv('SECRET_KEY', config.username)
-PASSWORD = os.getenv('SECRET_KEY', config.password)
-USER_AGENT = os.getenv('SECRET_KEY', config.user_agent)
-HOST = os.getenv('SECRET_KEY', config.host)
-USER = os.getenv('SECRET_KEY', config.user)
-PASSWD = os.getenv('SECRET_KEY', config.passwd)
+load_dotenv()
 
 # Initialize reddit api here 
 reddit = praw.Reddit(
-    client_id=CLIENT_ID,
-    client_secret=CLIENT_SECRET, 
-    username=USERNAME,
-    password=PASSWORD,
-    user_agent=USER_AGENT
+    client_id=os.getenv('CLIENT_ID'),
+    client_secret=os.getenv('CLIENT_SECRET'),
+    username=os.getenv('USERNAME'),
+    password=os.getenv('PASSWORD'),
+    user_agent=os.getenv('USER_AGENT')
 )
 
-# Connect to a mysql server
-mydb = mysql.connector.connect(
-    host=HOST,
-    user=USER,
-    passwd=PASSWD
-)
+# CONNECT TO A PSQL SERVER
+# mydb = psycopg2.connect(
+#     host=os.getenv('HOST'),
+#     database=os.getenv('DATABASE'),
+#     user=os.getenv('USER'),
+#     password=os.getenv('PASSWD'),
+# )
 
-mycursor = mydb.cursor()
-
-# Create a database for storing reddit data 
-mycursor.execute("CREATE DATABASE IF NOT EXISTS reddit_data")
+## PUT YOUR URL IN AN ENVIRONMENT VARIABLE AND CONNECT.
+engine=create_engine(os.getenv("DATABASE_URL"), echo=True)
 
 # Title and body would be used for the sentiment analysis and for counting the number of times a particular ticker is mentioned 
-mycursor.execute("""CREATE TABLE IF NOT EXISTS reddit_data.reddit_data_sentiment
-                (date_time DATETIME,
-                subreddit VARCHAR(500),
-                title VARCHAR(500),
-                body VARCHAR(2000),
-                author VARCHAR(500),
-                sentiment DECIMAL(5,4)
-                )
-                """)
+engine.execute("""CREATE TABLE IF NOT EXISTS reddit_data (
+                    date_time TIMESTAMP,
+                    subreddit VARCHAR(500),
+                    title VARCHAR(500),
+                    body VARCHAR(2000)
+                )""")
 
 # pushing the data to the database 
-sqlFormula = "INSERT INTO reddit_data.reddit_data_sentiment (date_time, subreddit, title, body, author, sentiment) VALUES (%s, %s, %s, %s, %s, %s)"
+sqlFormula = "INSERT INTO reddit_data (date_time, subreddit, title, body) VALUES (%s, %s, %s, %s)"
 
 ## Streaming comments from reddit 
 while True:
@@ -66,18 +50,15 @@ while True:
         for comment in subreddit.stream.comments(skip_existing=True):
                 current_time = datetime.datetime.now()
                 subreddit = str(comment.subreddit)
-                author = str(comment.author)
                 title = str(comment.link_title)
                 body = str(comment.body)
                 if len(body) < 2000:
                     body = body
                 elif len(body) > 2000:
                     body = "data is too large" ## very rare situation - less than 0.1% of the cases have comment more than 2000 characters 
-                vs = analyzer.polarity_scores(unidecode(body))
-                sentiment = vs['compound']
-                db = (current_time,subreddit,title,body,author,sentiment)
-                mycursor.execute(sqlFormula, db)
-                mydb.commit()
+                db=(current_time,subreddit,title,body)
+                engine.execute(sqlFormula, db)
+                
 
     # Keep an exception so that in case of error you dont hit the api multiple times and also your code wont crash on the vm
     except Exception as e:

@@ -1,8 +1,19 @@
-MySQL Connection not available.
-Execution failed on sql: SELECT * FROM reddit_data.reddit_data_sentiment 
-                WHERE body LIKE %s AND date_time > ADDDATE(date_time, -1)
-                OR body LIKE %s AND date_time > ADDDATE(date_time, -1)
-                ORDER BY date_time DESC LIMIT 20;
-2013 (HY000): Lost connection to MySQL server during query
-unable to rollback
-MySQL Connection not available.
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
+'scoped_session' object has no attribute 'cursor'
