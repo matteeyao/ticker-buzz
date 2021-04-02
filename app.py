@@ -385,7 +385,22 @@ BODY = dbc.Container(
     className="mt-12",
 )
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
+    meta_tags=[
+        {
+            "property":"og:title",
+            "content":"Ticker buzz"
+        },
+        {
+            "property":"og:image",
+            "content":"https://ecarrieres.com/wp-content/uploads/2020/01/Banque-finance-et-assurance-SALON.png"
+        },
+        {
+            "property":"og:description",
+            "content":"Ticker Buzz, a personal stock dashboard that combines the intelligence of Yahoo finance and several financial analysis chart types with live mentions regarding the stock that happen on Reddit."
+        }
+    ]
+)
 
 app.title = "Ticker Buzz"
 
