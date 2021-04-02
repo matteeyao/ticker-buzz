@@ -63,3 +63,5 @@ def stream_reddit_mentions():
         except Exception as e:
             print(str(e))
             time.sleep(10)
+
+stream_reddit_mentions()

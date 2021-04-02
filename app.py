@@ -53,7 +53,7 @@ from reddit_stream import stream_reddit_mentions
 
 q = Queue(connection=conn)
 
-result = q.enqueue(stream_reddit_mentions, 'https://ticker-buzz.herokuapp.com/')
+result = q.enqueue(stream_reddit_mentions)
 
 #-------------------------------HELPER FUNCTIONS--------------------------------
 
