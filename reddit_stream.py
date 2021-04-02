@@ -43,7 +43,7 @@ engine.execute("""CREATE TABLE IF NOT EXISTS reddit_data (
 sqlFormula = "INSERT INTO reddit_data (date_time, subreddit, title, body) VALUES (%s, %s, %s, %s)"
 
 ## Streaming comments from reddit 
-while datetime.datetime.now() < :
+while (datetime.time(8, 00, 0, 0, pytz.timezone('America/Chicago')) < datetime.datetime.now().time() and datetime.datetime.now().time() < datetime.time(22, 00, 0, 0, pytz.timezone('America/Chicago'))):
     try:
         # list of subreddits to be tracked -- you can add the ones you think are important to track 
         subreddit = reddit.subreddit("wallstreetbets+investing+stocks+pennystocks+weedstocks+StockMarket+Trading+Daytrading+algotrading")
@@ -63,4 +63,3 @@ while datetime.datetime.now() < :
     except Exception as e:
         print(str(e))
         time.sleep(10)
-
