@@ -52,7 +52,7 @@ class listener(StreamListener):
     def on_error(self,status):
         print(status)
 
-## Connecting to twitter and establishing a live stream 
+## Connecting to twitter and establishing a live stream
 while True:
     try:
         auth = OAuthHandler(ckey, csecret)

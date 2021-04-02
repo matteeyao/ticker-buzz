@@ -46,6 +46,14 @@ colors = {
     "text": "#000000"
 }
 
+#-----------------------------QUEUE BACKGROUND JOBS-----------------------------
+from rq import Queue
+from worker import conn
+
+q = Queue(connection=conn)
+
+result = q.enqueue(count_words_at_url, 'https://ticker-buzz.herokuapp.com/')
+
 #-------------------------------HELPER FUNCTIONS--------------------------------
 
 # GENERATE STOCK STATS TABLE
