@@ -947,12 +947,3 @@ def update_mentions(n_clicks, ticker):
 
 server = app.server
 dev_server = app.run_server
-
-#-----------------------------QUEUE BACKGROUND JOBS-----------------------------
-from rq import Queue
-from worker import conn
-from reddit_stream import stream_reddit_mentions
-
-q = Queue(connection=conn)
-
-result = q.enqueue(stream_reddit_mentions)

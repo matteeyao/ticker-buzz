@@ -6,6 +6,7 @@ from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
 import datetime
 import time
+import pytz
 from unidecode import unidecode
 import pandas as pd
 import json
@@ -53,7 +54,7 @@ class listener(StreamListener):
         print(status)
 
 ## Connecting to twitter and establishing a live stream
-while True:
+while (datetime.time(8, 00, 0, 0, pytz.timezone('America/Chicago')) < datetime.datetime.now().time() and datetime.datetime.now().time() < datetime.time(22, 00, 0, 0, pytz.timezone('America/Chicago'))):
     try:
         auth = OAuthHandler(ckey, csecret)
         auth.set_access_token(atoken, asecret)

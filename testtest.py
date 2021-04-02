@@ -20,13 +20,14 @@ import dash_bootstrap_components as dbc
 import dash_table as dt
 import yahoo_fin.stock_info as yf
 import yfinance
-from datetime import datetime, timedelta, date
+import datetime
 import plotly.graph_objs as go
 import pickle
 import numpy as np
 import pandas as pd
 import random
 import numpy
+import pytz
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -42,4 +43,9 @@ reddit_df = pd.read_sql(
                 """SELECT * FROM reddit_data
                 ORDER BY date_time DESC LIMIT 20;""", con=engine, params=('%'+company+'%', '%$'+ticker+' %',))
 
-print(reddit_df)
+# print((datetime.datetime.now().time() + datetime.timedelta(hours=9)))
+
+# print(datetime.time(8, 00, 0, 0, pytz.timezone('America/Chicago')) < datetime.datetime.now().time() and datetime.datetime.now().time() < datetime.time(22, 00, 0, 0, pytz.timezone('America/Chicago')))
+
+# print(datetime.time(8, 00, 0, 0, pytz.timezone('America/Chicago')) < (datetime.datetime.now().time() + datetime.timedelta(hours=9)) and (datetime.datetime.now().time() + datetime.timedelta(hours=9)) < datetime.time(10, 00, 0, 0, pytz.timezone('America/Chicago')))
+
