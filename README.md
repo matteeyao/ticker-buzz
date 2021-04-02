@@ -1,6 +1,6 @@
 # [Ticker Buzz](https://ticker-buzz.herokuapp.com/)
 
-![](.gif)
+<img src="assets/ticker-buzz.gif" width="1000">
 
 ### Table of contents
 1. [Background](#background)
