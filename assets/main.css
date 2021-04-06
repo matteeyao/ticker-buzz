@@ -683,3 +683,21 @@ there.
     background-color: transparent;
     display: none;
 }
+
+.fa-linkedin::before {
+    font-size: 4rem;
+    color: white;
+    margin-right: 20px;
+}
+
+.fa-github::before {
+    font-size: 4rem;
+    color: white;
+    margin-right: 20px;
+}
+
+.fa-angellist::before {
+    font-size: 4rem;
+    color: white;
+    margin-right: 20px;
+}

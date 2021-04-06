@@ -188,7 +188,7 @@ NAVBAR = dbc.Navbar(
                 align="center",
                 no_gutters=True,
             ),
-            href="https://github.com/matteeyao",
+            href="",
         )
     ],
     color="dark",
@@ -239,7 +239,7 @@ LEFT_COLUMN = dbc.Jumbotron(
                 ]),
                 html.P(
                     "(Source: Yahoo Finance)",
-                    style={"fontSize": 10, "font-weight": "lighter", "position": "absolute", "bottom": "4.5%"},
+                    style={"fontSize": 10, "font-weight": "lighter", "position": "absolute", "bottom": "3.5%"},
                 ),
             ],
             type="circle",
@@ -380,12 +380,55 @@ BODY = dbc.Container(
             ],
             style={"marginTop": 30},
         ),
-        dbc.Row([dbc.Col(dbc.Card(REDDIT_COMMENTS_CONTAINER)),], style={"marginTop": 15, "marginBottom": 15}),
+        dbc.Row([dbc.Col(dbc.Card(REDDIT_COMMENTS_CONTAINER)),], style={"marginTop": 15, "marginBottom": 50}),
     ],
     className="mt-12",
 )
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
+FOOTER = html.Footer(
+    children=[
+        dbc.Row(
+            [
+                dbc.Col(
+                    [
+                        html.A(
+                            [
+                                html.I(
+                                    className="fab fa-github",
+                                ),
+                            ],
+                            href="https://github.com/matteeyao",
+                            target="_blank"
+                        ),
+                        html.A(
+                            [
+                                html.I(
+                                    className="fab fa-linkedin",
+                                ),
+                            ],
+                            href="https://www.linkedin.com/in/matt-yao/",
+                            target="_blank"
+                        ),
+                        html.A(
+                            [
+                                html.I(
+                                    className="fab fa-angellist",
+                                ),
+                            ],
+                            href="https://angel.co/u/myao",
+                            target="_blank"
+                        ),
+                    ]
+                )
+            ],
+            style={"marginBottom": 10}
+        ),
+        html.Hr(style={"borderTop": "2px solid white"}),
+    ],
+    style={"minHeight": 60, "backgroundColor": "#343a40", "padding": "30px 50px 20px 50px"}
+)
+
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://use.fontawesome.com/releases/v5.8.1/css/all.css'],
     meta_tags=[
         {
             "property":"og:title",
@@ -404,7 +447,7 @@ app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP],
 
 app.title = "Ticker Buzz"
 
-app.layout = html.Div(children=[NAVBAR, BODY])
+app.layout = html.Div(children=[NAVBAR, BODY, FOOTER])
 
 #-----------------------------CALLBACK FETCH STOCK------------------------------
 
