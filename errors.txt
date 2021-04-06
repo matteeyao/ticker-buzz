@@ -17,3 +17,111 @@
 'scoped_session' object has no attribute 'cursor'
 'scoped_session' object has no attribute 'cursor'
 'scoped_session' object has no attribute 'cursor'
+(psycopg2.errors.SyntaxError) syntax error at or near ")"
+LINE 1: SELECT DISTINCT ON () * FROM reddit_data
+                            ^
+
+[SQL: SELECT DISTINCT ON () * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.GroupingError) column "reddit_data.date_time" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT DISTINCT * FROM reddit_data
+                        ^
+
+[SQL: SELECT DISTINCT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY body
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.InvalidColumnReference) SELECT DISTINCT ON expressions must match initial ORDER BY expressions
+LINE 1: SELECT DISTINCT ON (body) * FROM reddit_data
+                            ^
+
+[SQL: SELECT DISTINCT ON (body) * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.SyntaxError) syntax error at or near "ORDER"
+LINE 4:                 ORDER BY date_time DESC LIMIT 20;
+                        ^
+
+[SQL: SELECT DISTINCT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY 
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.GroupingError) column "reddit_data.date_time" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT * FROM reddit_data
+               ^
+
+[SQL: SELECT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY subreddit, body
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.GroupingError) column "reddit_data.date_time" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT * FROM reddit_data
+               ^
+
+[SQL: SELECT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY subreddit, body
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.GroupingError) column "reddit_data.date_time" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT * FROM reddit_data
+               ^
+
+[SQL: SELECT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY body
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.GroupingError) column "reddit_data.date_time" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT * FROM reddit_data
+               ^
+
+[SQL: SELECT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY body
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.GroupingError) column "reddit_data.subreddit" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT * FROM reddit_data
+               ^
+
+[SQL: SELECT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY date_time
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.GroupingError) column "reddit_data.subreddit" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT * FROM reddit_data
+               ^
+
+[SQL: SELECT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY date_time
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.GroupingError) column "reddit_data.subreddit" must appear in the GROUP BY clause or be used in an aggregate function
+LINE 1: SELECT * FROM reddit_data
+               ^
+
+[SQL: SELECT * FROM reddit_data
+                WHERE body LIKE %s OR body LIKE %s
+                GROUP BY date_time
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)

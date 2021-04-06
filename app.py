@@ -945,8 +945,12 @@ def update_mentions(n_clicks, ticker):
 
         try:
             reddit_df = pd.read_sql(
-                """SELECT * FROM reddit_data
-                WHERE body LIKE %s OR body LIKE %s
+                """SELECT * FROM (
+                    SELECT DISTINCT ON (body) *
+                    FROM reddit_data
+                    WHERE body LIKE %s OR body LIKE %s
+                    ORDER BY body, date_time DESC
+                ) t
                 ORDER BY date_time DESC LIMIT 20;""", con=engine, params=('%'+company+'%', '%$'+ticker+' %',))
 
             reddit_df = reddit_df[['subreddit','date_time','body']]

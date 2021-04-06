@@ -40,7 +40,12 @@ company="Gamestop"
 ticker="GME"
 
 reddit_df = pd.read_sql(
-                """SELECT * FROM reddit_data
+                """SELECT * FROM (
+                    SELECT DISTINCT ON (body) *
+                    FROM reddit_data
+                    WHERE body LIKE %s OR body LIKE %s
+                    ORDER BY body, date_time DESC
+                ) t
                 ORDER BY date_time DESC LIMIT 20;""", con=engine, params=('%'+company+'%', '%$'+ticker+' %',))
 
 # print((datetime.datetime.now().time() + datetime.timedelta(hours=9)))
@@ -49,3 +54,4 @@ reddit_df = pd.read_sql(
 
 # print(datetime.time(8, 00, 0, 0, pytz.timezone('America/Chicago')) < (datetime.datetime.now().time() + datetime.timedelta(hours=9)) and (datetime.datetime.now().time() + datetime.timedelta(hours=9)) < datetime.time(10, 00, 0, 0, pytz.timezone('America/Chicago')))
 
+print(reddit_df)
