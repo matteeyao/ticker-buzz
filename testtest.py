@@ -39,6 +39,7 @@ mydb=scoped_session(sessionmaker(bind=engine))
 company="Walt Disney Company"
 ticker="DIS"
 
+
 reddit_df = pd.read_sql(
                 """SELECT * FROM (
                     SELECT DISTINCT ON (body) *
@@ -55,6 +56,8 @@ reddit_df = pd.read_sql(
 # print(datetime.time(8, 00, 0, 0, pytz.timezone('America/Chicago')) < (datetime.datetime.now().time() + datetime.timedelta(hours=9)) and (datetime.datetime.now().time() + datetime.timedelta(hours=9)) < datetime.time(10, 00, 0, 0, pytz.timezone('America/Chicago')))
 
 stock = yfinance.Ticker(ticker)
+
+print(stock.info)
 
 def getStockTable(df, stock_info):
 
@@ -88,8 +91,11 @@ def getStockTable(df, stock_info):
     mktcap = f'{mktcap:,.0f}'
 
     # FORMAT BETA
-    beta = stock_info['beta']
-    beta = f'{beta:.2f}'
+    if 'beta' in stock_info and stock_info['beta'] is not None:
+        beta = stock_info['beta']
+        beta = f'{beta:.2f}'
+    else:
+        beta = 'N/A'
 
     # FORMAT PE AND FORWARD PE, IF NO PE, PE NOT IN THE DICTIONARY
     if 'trailingPE' in stock_info:
@@ -161,27 +167,29 @@ def getStockTable(df, stock_info):
             html.Td(stock_info['longBusinessSummary'])]),
         ])
 
-# NAME AND PRICE
-stock_name = stock.info['longName']
-price_list = stock.history(period='1y')['Close'].tolist()
-price = f'${price_list[-1]:.2f}'
-# PRICE CHANGE
-price_change = price_list[-1] - price_list[-2]
-price_percent_change = (price_list[-1]/price_list[-2])-1
+print(getStockTable(stock.history(period='1y').reset_index(), stock.info))
 
-if price_change > 0:
-    price_change_color = {'color':'green'}
-else:
-    price_change_color = {'color':'red'}
+# # NAME AND PRICE
+# stock_name = stock.info['longName']
+# price_list = stock.history(period='1y')['Close'].tolist()
+# price = f'${price_list[-1]:.2f}'
+# # PRICE CHANGE
+# price_change = price_list[-1] - price_list[-2]
+# price_percent_change = (price_list[-1]/price_list[-2])-1
 
-price_change_color['display']= 'inline-block'
-price_change_color['width']= '20%'
-price_change_color['fontSize'] = '150%'
+# if price_change > 0:
+#     price_change_color = {'color':'green'}
+# else:
+#     price_change_color = {'color':'red'}
 
-price_change = f'{price_change:.2f}'
-price_percent_change = f'{price_percent_change*100:,.2f}%'
+# price_change_color['display']= 'inline-block'
+# price_change_color['width']= '20%'
+# price_change_color['fontSize'] = '150%'
 
-table = getStockTable(stock.history(period='1y').reset_index(), stock.info)
+# price_change = f'{price_change:.2f}'
+# price_percent_change = f'{price_percent_change*100:,.2f}%'
 
-print(stock_name, price, price_change, price_change_color, 
-price_percent_change, price_change_color, table)
+# table = getStockTable(stock.history(period='1y').reset_index(), stock.info)
+
+# print(stock_name, price, price_change, price_change_color, 
+# price_percent_change, price_change_color, table)

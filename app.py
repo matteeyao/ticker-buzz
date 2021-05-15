@@ -81,8 +81,11 @@ def getStockTable(df, stock_info):
     mktcap = f'{mktcap:,.0f}'
 
     # FORMAT BETA
-    beta = stock_info['beta']
-    beta = f'{beta:.2f}'
+    if 'beta' in stock_info and stock_info['beta'] is not None:
+        beta = stock_info['beta']
+        beta = f'{beta:.2f}'
+    else:
+        beta = 'N/A'
 
     # FORMAT PE AND FORWARD PE, IF NO PE, PE NOT IN THE DICTIONARY
     if 'trailingPE' in stock_info:
