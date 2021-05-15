@@ -239,7 +239,7 @@ LEFT_COLUMN = dbc.Jumbotron(
                 ]),
                 html.P(
                     "(Source: Yahoo Finance)",
-                    style={"fontSize": 10, "font-weight": "lighter", "position": "absolute", "bottom": "3.5%"},
+                    style={"fontSize": 10, "fontWeight": "lighter", "position": "absolute", "bottom": "3.5%"},
                 ),
             ],
             type="circle",
@@ -893,8 +893,8 @@ def get_ticker(n_clicks, ticker, chart_name):
         # FOR DEFAULT SETTING
         if ticker == '':
             return 'Please select a stock ticker', \
-                    '','',{'width':'20%', 'display':'inline-block', 'font-size': '150%'},'', \
-                    {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, None, {'data':None}
+                    '','',{'width':'20%', 'display':'inline-block', 'fontSize': '150%'},'', \
+                    {'width':'20%', 'display':'inline-block', 'fontSize': '150%'}, None, {'data':None}
                 
         # OBTAIN STOCK PRICE AND STATS
         stock = yfinance.Ticker(ticker)
@@ -902,8 +902,8 @@ def get_ticker(n_clicks, ticker, chart_name):
         # CATCH IF STOCK EXISTS
         if stock.history(period='ytd').shape[0] == 0:
             return 'Something went wrong', '$##.##', '##.##', \
-                    {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, '##.##%', \
-                    {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, None, {'data':None}
+                    {'width':'20%', 'display':'inline-block', 'fontSize': '150%'}, '##.##%', \
+                    {'width':'20%', 'display':'inline-block', 'fontSize': '150%'}, None, {'data':None}
 
         ### STOCK STATS FOR INFO BOX ###
         try:
@@ -922,7 +922,7 @@ def get_ticker(n_clicks, ticker, chart_name):
 
             price_change_color['display']= 'inline-block'
             price_change_color['width']= '20%'
-            price_change_color['font-size'] = '150%'
+            price_change_color['fontSize'] = '150%'
 
             price_change = f'{price_change:.2f}'
             price_percent_change = f'{price_percent_change*100:,.2f}%'
@@ -931,8 +931,8 @@ def get_ticker(n_clicks, ticker, chart_name):
 
         except:
             return 'Something went wrong(2)', '$##.##', '##.##', \
-                {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, '##.##%', \
-                {'width':'20%', 'display':'inline-block', 'font-size': '150%'}, None, {'data':None}
+                {'width':'20%', 'display':'inline-block', 'fontSize': '150%'}, '##.##%', \
+                {'width':'20%', 'display':'inline-block', 'fontSize': '150%'}, None, {'data':None}
 
     return stock_name, price, price_change, price_change_color, \
             price_percent_change, price_change_color, table, fig
