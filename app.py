@@ -32,10 +32,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 ## PUT YOUR URL IN AN ENVIRONMENT VARIABLE AND CONNECT.
-engine=create_engine(os.getenv("DATABASE_URL"))
+engine=create_engine(os.getenv("HEROKU_POSTGRESQL_PURPLE_URL"))
 mydb=scoped_session(sessionmaker(bind=engine))
 
-PLOTLY_LOGO = "/assets/favicon.ico"
+PLOTLY_LOGO = "./assets/favicon.ico"
 REDDIT_LOGO = "https://external-preview.redd.it/iDdntscPf-nfWKqzHRGFmhVxZm4hZgaKe5oyFws-yzA.png?auto=webp&s=38648ef0dc2c3fce76d5e1d8639234d8da0152b2"
 TWITTER_LOGO = "https://assets.stickpng.com/images/580b57fcd9996e24bc43c53e.png"
 with open("tickers.pickle", "rb") as f:

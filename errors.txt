@@ -164,3 +164,6 @@ LINE 3:                     FROM reddit_data
                 ORDER BY date_time DESC LIMIT 20;]
 [parameters: ('%Disney%', '%$DIS %')]
 (Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.OperationalError) FATAL:  role "dogxtitlbxguxx" is not permitted to log in
+
+(Background on this error at: http://sqlalche.me/e/13/e3q8)
