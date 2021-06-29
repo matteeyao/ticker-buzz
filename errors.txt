@@ -125,3 +125,42 @@ LINE 1: SELECT * FROM reddit_data
                 ORDER BY date_time DESC LIMIT 20;]
 [parameters: ('%Disney%', '%$DIS %')]
 (Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.UndefinedTable) relation "reddit_data" does not exist
+LINE 3:                     FROM reddit_data
+                                 ^
+
+[SQL: SELECT * FROM (
+                    SELECT DISTINCT ON (body) *
+                    FROM reddit_data
+                    WHERE body LIKE %s OR body LIKE %s
+                    ORDER BY body, date_time DESC
+                ) t
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.UndefinedTable) relation "reddit_data" does not exist
+LINE 3:                     FROM reddit_data
+                                 ^
+
+[SQL: SELECT * FROM (
+                    SELECT DISTINCT ON (body) *
+                    FROM reddit_data
+                    WHERE body LIKE %s OR body LIKE %s
+                    ORDER BY body, date_time DESC
+                ) t
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%AMC%', '%$AMC %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
+(psycopg2.errors.UndefinedTable) relation "reddit_data" does not exist
+LINE 3:                     FROM reddit_data
+                                 ^
+
+[SQL: SELECT * FROM (
+                    SELECT DISTINCT ON (body) *
+                    FROM reddit_data
+                    WHERE body LIKE %s OR body LIKE %s
+                    ORDER BY body, date_time DESC
+                ) t
+                ORDER BY date_time DESC LIMIT 20;]
+[parameters: ('%Disney%', '%$DIS %')]
+(Background on this error at: http://sqlalche.me/e/13/f405)
