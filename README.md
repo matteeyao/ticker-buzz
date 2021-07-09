@@ -38,8 +38,17 @@ Dash apps are rendered in the web browser. You can deploy your apps to servers a
 <br/>
 
 ## Quick start
+
 1. Clone repo
-2. install requirements.txt using pip install -r requirements.txt
+
+2. install requirements.txt using `pip install -r requirements.txt`
+
 3. Fill in your Twitter App credentials to reddit_stream.py. Go to apps.reddit.com to set that up if you need to.
+
 4. Run reddit_stream.py to build database
-5. If you're using this locally, you can run the application with the dev_server.py script. If you want to deploy this to a webserver, see my deploying Dash application tutorial
+
+5. If you're using this locally, you can run the application with the dev_server.py script.
+
+```zsh
+python3 dev_server.py
+```

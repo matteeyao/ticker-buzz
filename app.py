@@ -6,7 +6,6 @@ Module doc string
 import sys, os
 # sys.path.insert(0, os.path.realpath(os.path.dirname(__file__)))
 # os.chdir(os.path.realpath(os.path.dirname(__file__)))
-
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 from cachetools import LRUCache, cached, TTLCache
@@ -20,7 +19,7 @@ import dash_bootstrap_components as dbc
 import dash_table as dt
 import yahoo_fin.stock_info as yf
 import yfinance
-from datetime import datetime, timedelta, date
+from datetime import datetime, timedelta
 import plotly.graph_objs as go
 import pickle
 import numpy as np
@@ -28,11 +27,12 @@ import pandas as pd
 import random
 import numpy
 from dotenv import load_dotenv
+from src.stock_info import getStockTable
 
 load_dotenv()
 
 ## PUT YOUR URL IN AN ENVIRONMENT VARIABLE AND CONNECT.
-engine=create_engine(os.getenv("HEROKU_POSTGRESQL_PURPLE_URL"))
+engine=create_engine(os.getenv("DATABASE_URL"))
 mydb=scoped_session(sessionmaker(bind=engine))
 
 PLOTLY_LOGO = "./assets/favicon.ico"
@@ -46,120 +46,9 @@ colors = {
     "text": "#000000"
 }
 
-#-------------------------------HELPER FUNCTIONS--------------------------------
 
-# GENERATE STOCK STATS TABLE
-def getStockTable(df, stock_info):
-
-    last_day = df.iloc[-1,1:6]
-
-    # OPEN PRICE
-    last_open_price = last_day['Open']
-    last_open_price = f'{last_open_price:,.2f}'
-
-    # FORMAT THE DAY RANGE OF PRICE
-    low_day = last_day['Low']
-    high_day = last_day['High']
-    range_day = f'{low_day:,.2f}'+' - '+f'{high_day:,.2f}'
-
-    # OBTAIN AND FORMAT 52 WEEKS RANGE OF PRICE
-    low_52weeks = df['Low'].min()
-    high_52weeks = df['High'].max()
-    range_52weeks = f'{low_52weeks:,.2f}'+' - '+f'{high_52weeks:,.2f}'
-
-    # FORMAT VOLUMNE AND AVERAGE VOLUME
-    vol = last_day['Volume']
-    vol = f'{vol:,.0f}'
-    avg_vol = stock_info['averageVolume10days']
-    avg_vol = f'{avg_vol:,.0f}'
-
-    # OBTAIN SHARES OUTSTANDING
-    shareOutstanding = stock_info['sharesOutstanding']
-
-    # CALCULATE MARKET CAP AND FORMAT IT
-    mktcap = last_day['Close']*shareOutstanding
-    mktcap = f'{mktcap:,.0f}'
-
-    # FORMAT BETA
-    if 'beta' in stock_info and stock_info['beta'] is not None:
-        beta = stock_info['beta']
-        beta = f'{beta:.2f}'
-    else:
-        beta = 'N/A'
-
-    # FORMAT PE AND FORWARD PE, IF NO PE, PE NOT IN THE DICTIONARY
-    if 'trailingPE' in stock_info:
-        pe = stock_info['trailingPE']
-        pe = f'{pe:.2f}'
-    else:
-        pe = 'N/A'
-    if 'forwardPE' in stock_info and stock_info['forwardPE'] != None:
-        fpe = stock_info['forwardPE']
-        fpe = f'{fpe:.2f}'
-    else:
-        fpe = 'N/A'
-
-    # FORMAT EPS
-    eps = stock_info['trailingEps']
-    eps = f'{eps:.2f}'
-
-    # FORMAT PROFIT MARGIN
-    margin = stock_info['profitMargins']
-    margin = f'{margin:.2f}'
-
-    # PREPARE DATA FOR DIVIDENT RATE
-    if stock_info['dividendRate'] is None or stock_info['dividendRate']=='':
-        dividend = 'N/A'
-    else:
-        dividend = stock_info['dividendRate']
-
-    # PREPATE DATA FOR EX-DIVIDEND DATE
-    if stock_info['exDividendDate'] is not None:
-        ex_dividend_date = datetime.fromtimestamp(stock_info['exDividendDate'])
-        ex_dividend_date = ex_dividend_date.strftime('%m-%d-%Y')
-    else: 
-        ex_dividend_date = 'N/A'
-
-    return html.Table([
-        html.Tr([html.Td('Industry'), html.Td(),
-                    html.Td(stock_info['industry'])]),
-        html.Tr([html.Td('Previous Close'), html.Td(),
-                    html.Td(stock_info['previousClose'])]),
-        html.Tr([html.Td('Open'), html.Td(),
-                    html.Td(last_open_price)]),
-        html.Tr([html.Td('Day Range'), html.Td(),
-                    html.Td(range_day)]),
-        html.Tr([html.Td('52 Weeks Range'), html.Td(),
-                    html.Td(range_52weeks)]),
-        html.Tr([html.Td('Volume'), html.Td(),
-                    html.Td(vol)]),
-        html.Tr([html.Td('Average Volume'), html.Td(),
-                    html.Td(avg_vol)]),
-        html.Tr([html.Td('Market Capitalization'), html.Td(),
-                    html.Td(mktcap)]),
-        html.Tr([html.Td('Beta'), html.Td(),
-                    html.Td(beta)]),
-        html.Tr([html.Td('PE'), html.Td(),
-                    html.Td(pe)]),
-        html.Tr([html.Td('Forward PE'), html.Td(),
-                    html.Td(fpe)]),
-        html.Tr([html.Td('Earning Per Share (EPS)'), html.Td(),
-                    html.Td(eps)]),
-        html.Tr([html.Td('Profit Margin'), html.Td(),
-                    html.Td(margin)]),
-        html.Tr([html.Td('Dividend'), html.Td(),
-                    html.Td(dividend)]),
-        html.Tr([html.Td('Ex-Dividend Date'), html.Td(),
-                    html.Td(ex_dividend_date)]),
-        html.Tr([html.Td('Shares Outstanding'), html.Td(),
-                    html.Td(f'{shareOutstanding:,.0f}')]),
-        html.Tr([html.Td('Business Summary'), html.Td(),
-            html.Td(stock_info['longBusinessSummary'])]),
-        ])
-
+#---------------------------PAGE LAYOUT AND CONTENTS---------------------------#
 """
-#---------------------------PAGE LAYOUT AND CONTENTS----------------------------
-
 In an effort to clean up the code a bit, we decided to break it apart into
 sections. For instance: LEFT_COLUMN is the input controls you see in that gray
 box on the top left. The body variable is the overall structure which most other
@@ -431,7 +320,12 @@ FOOTER = html.Footer(
     style={"minHeight": 60, "backgroundColor": "#343a40", "padding": "30px 50px 20px 50px"}
 )
 
-app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP, 'https://use.fontawesome.com/releases/v5.8.1/css/all.css'],
+app = dash.Dash(
+    __name__, 
+    external_stylesheets=[
+        dbc.themes.BOOTSTRAP, 
+        'https://use.fontawesome.com/releases/v5.8.1/css/all.css'
+    ],
     meta_tags=[
         {
             "property":"og:title",
@@ -452,23 +346,29 @@ app.title = "Ticker Buzz"
 
 app.layout = html.Div(children=[NAVBAR, BODY, FOOTER])
 
-#-----------------------------CALLBACK FETCH STOCK------------------------------
+#-----------------------------CALLBACK FETCH STOCK-----------------------------#
 
 @app.callback(
     # OUTPUT
-    [Output('stock-name','children'), # STOCK NAME
-    Output('stock-price','children'), # CURRENT STOCK PRICE
-    Output('stock-price-change','children'), # PRICE CHANGE
-    Output('stock-price-change','style'), # PRICE CHANGE FONT COLOR
-    Output('stock-price-percent-change','children'), # PRICE PERCENT CHANGE
-    Output('stock-price-percent-change','style'), # PRICE PERCENT CHANGE FONT COLOR
-    Output('stock-table-info','children'), # STOCK TABLE STATS
-    Output("live-stock-chart", "figure")],
-    # INPUT
-    [Input('submit-button-state','n_clicks')], # BUTTON
+    [
+        Output('stock-name','children'), # STOCK NAME
+        Output('stock-price','children'), # CURRENT STOCK PRICE
+        Output('stock-price-change','children'), # PRICE CHANGE
+        Output('stock-price-change','style'), # PRICE CHANGE FONT COLOR
+        Output('stock-price-percent-change','children'), # PRICE PERCENT CHANGE
+        Output('stock-price-percent-change','style'), # PRICE PERCENT CHANGE FONT COLOR
+        Output('stock-table-info','children'), # STOCK TABLE STATS
+        Output("live-stock-chart", "figure")
+    ],
+    # INPUT (BUTTON)
+    [
+        Input('submit-button-state','n_clicks')
+    ],
     # STATE
-    [State("stock_ticker", "value"), # TICKER INPUT
-     State("chart", "value")],
+    [
+        State("stock_ticker", "value"), # TICKER INPUT
+        State("chart", "value")
+    ],
 )
 
 def get_ticker(n_clicks, ticker, chart_name):
@@ -478,12 +378,13 @@ def get_ticker(n_clicks, ticker, chart_name):
     if n_clicks >= 1:  # CHECKING FOR USER TO CLICK SUBMIT BUTTON
 
         # LOADING DATA
-        start_date = datetime.now().date() - timedelta(days=5 * 365)
-        end_data = datetime.now().date()
-        df = yf.get_data(
-            ticker, start_date=start_date, end_date=end_data, interval="1d"
-        )
-        stock = Sdf(df)
+        # start_date = datetime.now().date() - timedelta(days=5 * 365)
+        # end_data = datetime.now().date()
+        # df = yf.get_data(
+        #     ticker, start_date=start_date, end_date=end_data, interval="1d"
+        # )
+        df = yfinance.Ticker(ticker).history(period='5y')
+        stock = Sdf.retype(df)
 
         # -*- SELECTING GRAPH TYPE -*-
 
@@ -790,8 +691,7 @@ def get_ticker(n_clicks, ticker, chart_name):
             fig = go.Figure(
                 data=[
                     go.Scatter(x=list(df.index), y=list(df.MACD), name="MACD"),
-                    go.Scatter(x=list(df.index), y=list(
-                        df.signal), name="Signal"),
+                    go.Scatter(x=list(df.index), y=list(df.signal), name="Signal"),
                     go.Scatter(
                         x=list(df.index),
                         y=list(df["hist"]),
@@ -940,7 +840,7 @@ def get_ticker(n_clicks, ticker, chart_name):
     return stock_name, price, price_change, price_change_color, \
             price_percent_change, price_change_color, table, fig
 
-#------------------------FETCH REDDIT/TWITTER MENTIONS--------------------------
+#------------------------FETCH REDDIT/TWITTER MENTIONS-------------------------#
 
 def generate_reddit_cards(df):
     return [dbc.Card(
@@ -1007,8 +907,6 @@ def update_mentions(n_clicks, ticker):
             with open('errors.txt', 'a') as f:
                 f.write(str(e))
                 f.write('\n')
-
-#-------------------------------------------------------------------------------
 
 server = app.server
 dev_server = app.run_server
