@@ -1,4 +1,4 @@
-# [Ticker Buzz](https://tickerbuzzz.herokuapp.com/)
+# [Ticker Buzz](https://ticker-buzz.herokuapp.com/)
 
 <img src="assets/ticker-buzz.gif" width="1000">
 
